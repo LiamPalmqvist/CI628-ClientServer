@@ -6,7 +6,7 @@ CXX_DEFINES =
 
 CXX_INCLUDES = -I/opt/homebrew/Cellar/sdl2/2.32.10/include -isystem /opt/homebrew/Cellar/sdl2/2.32.10/include/SDL2
 
-CXX_FLAGSarm64 = -std=gnu++20 -arch arm64
+CXX_FLAGSarm64 = -std=gnu++2b -arch arm64
 
-CXX_FLAGS = -std=gnu++20 -arch arm64
+CXX_FLAGS = -std=gnu++2b -arch arm64
 

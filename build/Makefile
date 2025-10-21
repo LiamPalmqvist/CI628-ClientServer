@@ -136,6 +136,78 @@ Client/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Client.dir/build.make CMakeFiles/Client.dir/build
 .PHONY : Client/fast
 
+Client.o: Client.cpp.o
+.PHONY : Client.o
+
+# target to build an object file
+Client.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Client.dir/build.make CMakeFiles/Client.dir/Client.cpp.o
+.PHONY : Client.cpp.o
+
+Client.i: Client.cpp.i
+.PHONY : Client.i
+
+# target to preprocess a source file
+Client.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Client.dir/build.make CMakeFiles/Client.dir/Client.cpp.i
+.PHONY : Client.cpp.i
+
+Client.s: Client.cpp.s
+.PHONY : Client.s
+
+# target to generate assembly for a file
+Client.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Client.dir/build.make CMakeFiles/Client.dir/Client.cpp.s
+.PHONY : Client.cpp.s
+
+Entity.o: Entity.cpp.o
+.PHONY : Entity.o
+
+# target to build an object file
+Entity.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Client.dir/build.make CMakeFiles/Client.dir/Entity.cpp.o
+.PHONY : Entity.cpp.o
+
+Entity.i: Entity.cpp.i
+.PHONY : Entity.i
+
+# target to preprocess a source file
+Entity.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Client.dir/build.make CMakeFiles/Client.dir/Entity.cpp.i
+.PHONY : Entity.cpp.i
+
+Entity.s: Entity.cpp.s
+.PHONY : Entity.s
+
+# target to generate assembly for a file
+Entity.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Client.dir/build.make CMakeFiles/Client.dir/Entity.cpp.s
+.PHONY : Entity.cpp.s
+
+Server.o: Server.cpp.o
+.PHONY : Server.o
+
+# target to build an object file
+Server.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Client.dir/build.make CMakeFiles/Client.dir/Server.cpp.o
+.PHONY : Server.cpp.o
+
+Server.i: Server.cpp.i
+.PHONY : Server.i
+
+# target to preprocess a source file
+Server.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Client.dir/build.make CMakeFiles/Client.dir/Server.cpp.i
+.PHONY : Server.cpp.i
+
+Server.s: Server.cpp.s
+.PHONY : Server.s
+
+# target to generate assembly for a file
+Server.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Client.dir/build.make CMakeFiles/Client.dir/Server.cpp.s
+.PHONY : Server.cpp.s
+
 main.o: main.cpp.o
 .PHONY : main.o
 
@@ -170,6 +242,15 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... Client"
+	@echo "... Client.o"
+	@echo "... Client.i"
+	@echo "... Client.s"
+	@echo "... Entity.o"
+	@echo "... Entity.i"
+	@echo "... Entity.s"
+	@echo "... Server.o"
+	@echo "... Server.i"
+	@echo "... Server.s"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"
