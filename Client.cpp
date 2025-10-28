@@ -4,6 +4,10 @@
 
 #include "Client.h"
 
+#include <algorithm>
+#include <chrono>
+#include <thread>
+
 Client::Client(std::string ipAddress, int port)
 {
     int sockfd, portno, n;
@@ -78,37 +82,124 @@ Client::Client(std::string ipAddress, int port)
 	printf("%s\n", buffer);
     }
     */
-    setupSDL();
+    setupSDL(sockfd);
     return;
 }
 
-void Client::pingServer(int sock) {
+void Client::pingServer(int sockfd) {
+	// setup default states
+	state = States::unassigned;
 	threadRunning = true;
-	int n;
 	char buffer[256];
-	while(threadRunning) {
-		printf("Please enter a message: ");
-		bzero(buffer, 256);
-		fgets(buffer, 255, stdin);
+	uint8_t message;
 
-		std::string strBuffer = buffer;
-		if (strBuffer.contains("exit")) {
-			threadRunning = false;
+	write(sockfd, "Ping", sizeof("Ping"));
+
+	// set up the thread to check for input from server
+	while(threadRunning) {
+
+		switch (state) {
+		case States::unassigned:
+			std::cout << "Unassigned" << std::endl;
+			checkForConnection(sockfd, buffer);
+			break;
+		case States::assigned:
+			std::cout << "Assigned" << std::endl;
+			sendInputs(sockfd, buffer);
 			break;
 		}
 
-		n = write(sock, buffer, strlen(buffer));
-		if (n < 0)
-			error("ERROR writing to socket");
-		bzero(buffer, 256);
-		read(sock, buffer, 255);
-		if (n < 0)
-			error("ERROR reading from socket");
-		printf("%s\n", buffer);
+		//fgets(buffer, 255, stdin);
+
+		/*
+		std::string message = "{\"keys\":{";
+		for (int i = 0; i < std::size(keys); i++)
+		{
+			message += "\"" + keyNames[i] + "\":\"" + (keys[i] ? "true" : "false") + "\"";
+			if (i != std::size(keys) - 1)
+			{
+				message += ",";
+			}
+		}
+		message += "}}";
+		*/
+
+		std::this_thread::sleep_for(std::chrono::seconds(1));
 	}
 }
 
-int Client::setupSDL() {
+void Client::checkForConnection(int sockfd, char buffer[256])
+{
+	// Try to read from the socket
+	int n = read(sockfd, buffer, 255);
+	if (n < 0)
+		error("ERROR reading from socket");
+	// convert the buffer to a readable string
+	std::string output = buffer;
+
+	// check string for assignment message
+	if (int index = output.find("assigned: "); index != std::string::npos) {
+		std::cout << output.back() << std::endl;
+		clientNumber = std::stoi(output.substr(output.size() - 1));
+		state = States::assigned;
+	}
+
+	// make sure to clear the buffer
+	bzero(buffer, 256);
+}
+
+void Client::sendInputs(int sockfd, char buffer[256])
+{
+	int n;
+	uint8_t message = 0b00000000;
+
+	// first, OR the client number with the message
+	switch (clientNumber)
+	{
+	case 1:
+		message |= 0b01000000;
+		break;
+	case 2:
+		message |= 0b10000000;
+		break;
+	case 3:
+		message |= 0b11000000;
+		break;
+	default:
+		break;
+	}
+
+	// second, create mask from keys values
+	std::string mask = "00";
+	for (int i = 0; i < std::size(keys); i++)
+	{
+		if (keys[i]) {
+			mask += "1";
+		} else {
+			mask += "0";
+		}
+	}
+
+	const uint8_t mask2 = std::stoi(mask);
+	message |= mask2;
+	std::cout << message << std::endl;
+
+	n = write(sockfd, &message, sizeof(message));
+	std::cout << message << std::endl;
+	//n = write(sock, buffer, strlen(buffer));
+	if (n < 0)
+		error("ERROR writing to socket");
+	bzero(buffer, 256);
+
+	// Read from the socket to the buffer
+	read(sockfd, buffer, 255);
+	if (n < 0)
+		error("ERROR reading from socket");
+	// and make changes
+
+}
+
+int Client::setupSDL(int sockfd) {
 
 	// Check if we can create an SDL Window
 	if (SDL_Init(SDL_INIT_VIDEO) != 0) {
@@ -157,12 +248,15 @@ int Client::setupSDL() {
 	while (running) {
 		// Process events
 		while (SDL_PollEvent(&event)) {
+			input(event);
 			if (event.type == SDL_QUIT) {
 				std::cout << "exit" << std::endl;
 				threadRunning = false;
 				running = false;
 			}
 		}
+
+		//pingServer(sockfd);
 
 		if (!threadRunning)
 		{
@@ -182,6 +276,36 @@ int Client::setupSDL() {
 	SDL_Quit();
 
 	return 0;
+}
+
+void Client::input(SDL_Event &event)
+{
+	switch (event.key.keysym.sym)
+	{
+	case SDLK_w:
+		keys[0] = event.type == SDL_KEYDOWN;
+		break;
+	case SDLK_a:
+		keys[1] = event.type == SDL_KEYDOWN;
+		break;
+	case SDLK_s:
+		keys[2] = event.type == SDL_KEYDOWN;
+		break;
+	case SDLK_d:
+		keys[3] = event.type == SDL_KEYDOWN;
+		break;
+	case SDLK_LSHIFT:
+		keys[4] = event.type == SDL_KEYDOWN;
+		break;
+	case SDLK_LCTRL:
+		keys[5] = event.type == SDL_KEYDOWN;
+		break;
+	case SDLK_ESCAPE:
+		std::cout << "exit";
+		threadRunning = false;
+	default:
+		break;
+	}
 }
 
 // returns true is IP Address is valid, false if not

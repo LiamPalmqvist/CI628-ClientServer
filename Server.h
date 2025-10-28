@@ -22,16 +22,48 @@
 #include <thread> // for threading
 #include <list> // for lists
 #include "Entity.h"
+#include <future>
+#include <chrono>
+#include <memory>
+#include <queue>
+
+struct MessageQueue {
+    std::queue<std::string> queue;
+    std::mutex mtx; // MUTual EXclusion - ensures that only one thread at a time can access a shared resource
+
+    // Pushes a message to the queue
+    void push(const std::string& msg) {
+        std::lock_guard lock(mtx);
+        queue.push(msg);
+    }
+
+    // Tries to pop a message from the queue
+    bool try_pop(std::string& msg) {
+        std::lock_guard lock(mtx); // This makes sure that the message is locked to this thread
+        if (queue.empty()) return false;
+        msg = queue.front();
+        queue.pop();
+        return true;
+    }
+};
+
+// Required for multithreading/converting
+struct ClientData {
+    std::thread thread;
+    std::shared_ptr<MessageQueue> messages;
+    bool active = true;
+};
 
 class Server
 {
 public:
-    Server(std::string ipAddress, int port);
-    static int connectClient(int sock);
+    Server(const std::string &ipAddress, int port);
+    static int connectClient(int sock, std::shared_ptr<MessageQueue> msgQueue, int clientsLength);
     bool validateIpAddress(const std::string &ipAddress);
     bool validatePortNumber(const int &portNumber);
     static void error(const char *msg);
 };
+
 
 
 #endif //CLIENT_SERVER_H

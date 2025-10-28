@@ -22,10 +22,10 @@ int main(int argc, char *argv[])
     //std::cout << validatePortNumber(-1) << std::endl;
 
 
-    if (argc > 1 && !strcmp(argv[1], "client")) {
-	Client("127.0.0.1", 2000);
+    if (argc > 1 && !strcmp(argv[1], "server")) {
+		Server("127.0.0.1", 2000);
     } else {
-    	Server("127.0.0.1", 2000);
+    	Client("127.0.0.1", 2000);
     }
 
 
