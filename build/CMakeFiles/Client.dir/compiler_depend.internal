@@ -996,9 +996,9 @@ CMakeFiles/Client.dir/Client.cpp.o
  /opt/homebrew/Cellar/sdl2/2.32.10/include/SDL2/begin_code.h
  /opt/homebrew/Cellar/sdl2/2.32.10/include/SDL2/close_code.h
 
-CMakeFiles/Client.dir/Entity.cpp.o
- /Users/liam/Programming/C++/ServerClient/Entity.cpp
- /Users/liam/Programming/C++/ServerClient/Entity.h
+CMakeFiles/Client.dir/Game.cpp.o
+ /Users/liam/Programming/C++/ServerClient/Game.cpp
+ /Users/liam/Programming/C++/ServerClient/Game.h
 
 CMakeFiles/Client.dir/Server.cpp.o
  /Users/liam/Programming/C++/ServerClient/Server.cpp
@@ -1971,7 +1971,6 @@ CMakeFiles/Client.dir/Server.cpp.o
  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/17/include/stdarg.h
  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/17/include/stddef.h
  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/17/include/stdint.h
- /Users/liam/Programming/C++/ServerClient/Entity.h
  /Users/liam/Programming/C++/ServerClient/Server.h
  /opt/homebrew/Cellar/sdl2/2.32.10/include/SDL2/SDL.h
  /opt/homebrew/Cellar/sdl2/2.32.10/include/SDL2/SDL_assert.h
@@ -2830,7 +2829,6 @@ CMakeFiles/Client.dir/main.cpp.o
  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/17/include/stddef.h
  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/17/include/stdint.h
  /Users/liam/Programming/C++/ServerClient/Client.h
- /Users/liam/Programming/C++/ServerClient/Entity.h
  /Users/liam/Programming/C++/ServerClient/Server.h
  /opt/homebrew/Cellar/sdl2/2.32.10/include/SDL2/SDL.h
  /opt/homebrew/Cellar/sdl2/2.32.10/include/SDL2/SDL_assert.h

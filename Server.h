@@ -21,7 +21,6 @@
 #include <SDL2/SDL.h>
 #include <thread> // for threading
 #include <list> // for lists
-#include "Entity.h"
 #include <future>
 #include <chrono>
 #include <memory>
@@ -57,10 +56,12 @@ struct ClientData {
 class Server
 {
 public:
+    int clientLength = 0;
     Server(const std::string &ipAddress, int port);
-    static int connectClient(int sock, std::shared_ptr<MessageQueue> msgQueue, int clientsLength);
-    bool validateIpAddress(const std::string &ipAddress);
-    bool validatePortNumber(const int &portNumber);
+    void listenOnPort(const std::string &ipAddress, int port);
+    int connectClient(int sock, const std::shared_ptr<MessageQueue>& msgQueue);
+    static bool validateIpAddress(const std::string &ipAddress);
+    static bool validatePortNumber(const int &portNumber);
     static void error(const char *msg);
 };
 

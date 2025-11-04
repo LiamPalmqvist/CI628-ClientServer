@@ -8,6 +8,17 @@
 
 Server::Server(const std::string& ipAddress, int port)
 {
+    std::thread listenThread(&Server::listenOnPort, this, ipAddress, port);
+    //listenOnPort(ipAddress, port);
+    int second = 1000;
+    while (true)
+    {
+        std::this_thread::sleep_for(std::chrono::milliseconds(second/20));
+        std::cout << clientLength << std::endl;
+    }
+}
+
+void Server::listenOnPort(const std::string& ipAddress, int port) {
     std::string str_port; // for atoi();
 
     // First, validate the IP and Port
@@ -84,15 +95,15 @@ Server::Server(const std::string& ipAddress, int port)
     int clientsLength = 0;
     std::list<ClientData> clients = {};
     // NOTE: START OF Multithreading code!
+
     while (true)
     {
-        // accept the new connection as newsockfd
         newsockfd = accept(sockfd, (struct sockaddr*)&cli_addr, (socklen_t*)&clilen);
         if (newsockfd < 0)
             error("ERROR on accept");
 
         // add one to the client length
-        clientsLength += 1;
+        clientLength++;
 
         // Create message queue for this client
         auto msgQueue = std::make_shared<MessageQueue>();
@@ -100,14 +111,13 @@ Server::Server(const std::string& ipAddress, int port)
         // Create thread with message queue
         ClientData client;
         client.messages = msgQueue;
-        client.thread = std::thread([newsockfd, msgQueue, &client, clientsLength]()
+        client.thread = std::thread([this, newsockfd, msgQueue, &client]()
         {
-            connectClient(newsockfd, msgQueue, clientsLength);
+            connectClient(newsockfd, msgQueue);
             client.active = false; // Mark as inactive when done
         });
 
         clients.push_back(std::move(client));
-
 
         // Check all clients for new messages
         for (auto it = clients.begin(); it != clients.end();)
@@ -134,9 +144,16 @@ Server::Server(const std::string& ipAddress, int port)
 }
 
 
-int Server::connectClient(int sock, std::shared_ptr<MessageQueue> msgQueue, int clientsLength)
+int Server::connectClient(int sock, const std::shared_ptr<MessageQueue>& msgQueue)
 {
-    std::cout << clientsLength << std::endl;
+    // close the socket if there are already 2 connections
+    if (clientLength >= 3)
+    {
+        close(sock);
+        clientLength--;
+    }
+
+    std::cout << clientLength << std::endl;
     int n; // return value for the read() and write() calls.
     char buffer[256];
     // the server reads characters from the socket connection into this buffer
@@ -167,7 +184,7 @@ int Server::connectClient(int sock, std::shared_ptr<MessageQueue> msgQueue, int 
 
         std::cout << "HELLO" << std::endl;
         if (!clientAssigned) {
-            std::string msg = "assigned: " + std::to_string(clientsLength);
+            std::string msg = "assigned: " + std::to_string(clientLength);
             std::cout << msg << std::endl;
             n = write(sock, msg.c_str(), sizeof(msg));
             if (n < 0)
@@ -191,7 +208,7 @@ int Server::connectClient(int sock, std::shared_ptr<MessageQueue> msgQueue, int 
             msgQueue->push(json_response);
 
             std::string message = "I got your message ";
-            message += std::to_string(clientsLength);
+            message += std::to_string(clientLength);
             n = write(sock, &message, sizeof(message));
             if (n < 0)
             {

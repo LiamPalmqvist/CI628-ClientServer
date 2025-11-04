@@ -245,6 +245,7 @@ int Client::setupSDL(int sockfd) {
 	// Finally, we get to the main loop
 	bool running = true;
 	SDL_Event event;
+
 	while (running) {
 		// Process events
 		while (SDL_PollEvent(&event)) {
@@ -256,7 +257,7 @@ int Client::setupSDL(int sockfd) {
 			}
 		}
 
-		//pingServer(sockfd);
+		//game->render();
 
 		if (!threadRunning)
 		{
@@ -264,7 +265,7 @@ int Client::setupSDL(int sockfd) {
 		}
 
 		// render something (White background)
-		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+		//SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 		SDL_RenderClear(renderer);
 		SDL_RenderPresent(renderer);
 	}

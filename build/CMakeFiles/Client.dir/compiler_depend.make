@@ -995,8 +995,8 @@ CMakeFiles/Client.dir/Client.cpp.o: /Users/liam/Programming/C++/ServerClient/Cli
   /opt/homebrew/Cellar/sdl2/2.32.10/include/SDL2/begin_code.h \
   /opt/homebrew/Cellar/sdl2/2.32.10/include/SDL2/close_code.h
 
-CMakeFiles/Client.dir/Entity.cpp.o: /Users/liam/Programming/C++/ServerClient/Entity.cpp \
-  /Users/liam/Programming/C++/ServerClient/Entity.h
+CMakeFiles/Client.dir/Game.cpp.o: /Users/liam/Programming/C++/ServerClient/Game.cpp \
+  /Users/liam/Programming/C++/ServerClient/Game.h
 
 CMakeFiles/Client.dir/Server.cpp.o: /Users/liam/Programming/C++/ServerClient/Server.cpp \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/Availability.h \
@@ -1968,7 +1968,6 @@ CMakeFiles/Client.dir/Server.cpp.o: /Users/liam/Programming/C++/ServerClient/Ser
   /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/17/include/stdarg.h \
   /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/17/include/stddef.h \
   /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/17/include/stdint.h \
-  /Users/liam/Programming/C++/ServerClient/Entity.h \
   /Users/liam/Programming/C++/ServerClient/Server.h \
   /opt/homebrew/Cellar/sdl2/2.32.10/include/SDL2/SDL.h \
   /opt/homebrew/Cellar/sdl2/2.32.10/include/SDL2/SDL_assert.h \
@@ -2826,7 +2825,6 @@ CMakeFiles/Client.dir/main.cpp.o: /Users/liam/Programming/C++/ServerClient/main.
   /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/17/include/stddef.h \
   /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/17/include/stdint.h \
   /Users/liam/Programming/C++/ServerClient/Client.h \
-  /Users/liam/Programming/C++/ServerClient/Entity.h \
   /Users/liam/Programming/C++/ServerClient/Server.h \
   /opt/homebrew/Cellar/sdl2/2.32.10/include/SDL2/SDL.h \
   /opt/homebrew/Cellar/sdl2/2.32.10/include/SDL2/SDL_assert.h \
@@ -3290,8 +3288,6 @@ CMakeFiles/Client.dir/main.cpp.o: /Users/liam/Programming/C++/ServerClient/main.
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__utility/in_place.h:
 
-/Users/liam/Programming/C++/ServerClient/Entity.cpp:
-
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__utility/element_count.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__utility/declval.h:
@@ -3447,6 +3443,8 @@ CMakeFiles/Client.dir/main.cpp.o: /Users/liam/Programming/C++/ServerClient/main.
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__type_traits/has_unique_object_representation.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__type_traits/extent.h:
+
+/Users/liam/Programming/C++/ServerClient/Game.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__algorithm/ranges_rotate_copy.h:
 
@@ -4498,8 +4496,6 @@ CMakeFiles/Client.dir/main.cpp.o: /Users/liam/Programming/C++/ServerClient/main.
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/iostream:
 
-/Users/liam/Programming/C++/ServerClient/Entity.h:
-
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__format/formatter_pointer.h:
 
 /opt/homebrew/Cellar/sdl2/2.32.10/include/SDL2/SDL_endian.h:
@@ -4589,6 +4585,8 @@ CMakeFiles/Client.dir/main.cpp.o: /Users/liam/Programming/C++/ServerClient/main.
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__algorithm/ranges_contains.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__ostream/put_character_sequence.h:
+
+/Users/liam/Programming/C++/ServerClient/Game.cpp:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__algorithm/ranges_mismatch.h:
 

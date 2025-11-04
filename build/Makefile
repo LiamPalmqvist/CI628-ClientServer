@@ -160,29 +160,29 @@ Client.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Client.dir/build.make CMakeFiles/Client.dir/Client.cpp.s
 .PHONY : Client.cpp.s
 
-Entity.o: Entity.cpp.o
-.PHONY : Entity.o
+Game.o: Game.cpp.o
+.PHONY : Game.o
 
 # target to build an object file
-Entity.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Client.dir/build.make CMakeFiles/Client.dir/Entity.cpp.o
-.PHONY : Entity.cpp.o
+Game.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Client.dir/build.make CMakeFiles/Client.dir/Game.cpp.o
+.PHONY : Game.cpp.o
 
-Entity.i: Entity.cpp.i
-.PHONY : Entity.i
+Game.i: Game.cpp.i
+.PHONY : Game.i
 
 # target to preprocess a source file
-Entity.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Client.dir/build.make CMakeFiles/Client.dir/Entity.cpp.i
-.PHONY : Entity.cpp.i
+Game.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Client.dir/build.make CMakeFiles/Client.dir/Game.cpp.i
+.PHONY : Game.cpp.i
 
-Entity.s: Entity.cpp.s
-.PHONY : Entity.s
+Game.s: Game.cpp.s
+.PHONY : Game.s
 
 # target to generate assembly for a file
-Entity.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Client.dir/build.make CMakeFiles/Client.dir/Entity.cpp.s
-.PHONY : Entity.cpp.s
+Game.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Client.dir/build.make CMakeFiles/Client.dir/Game.cpp.s
+.PHONY : Game.cpp.s
 
 Server.o: Server.cpp.o
 .PHONY : Server.o
@@ -245,9 +245,9 @@ help:
 	@echo "... Client.o"
 	@echo "... Client.i"
 	@echo "... Client.s"
-	@echo "... Entity.o"
-	@echo "... Entity.i"
-	@echo "... Entity.s"
+	@echo "... Game.o"
+	@echo "... Game.i"
+	@echo "... Game.s"
 	@echo "... Server.o"
 	@echo "... Server.i"
 	@echo "... Server.s"

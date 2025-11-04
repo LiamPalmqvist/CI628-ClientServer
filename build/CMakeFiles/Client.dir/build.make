@@ -114,26 +114,26 @@ CMakeFiles/Client.dir/Server.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Client.dir/Server.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/liam/Programming/C++/ServerClient/Server.cpp -o CMakeFiles/Client.dir/Server.cpp.s
 
-CMakeFiles/Client.dir/Entity.cpp.o: CMakeFiles/Client.dir/flags.make
-CMakeFiles/Client.dir/Entity.cpp.o: /Users/liam/Programming/C++/ServerClient/Entity.cpp
-CMakeFiles/Client.dir/Entity.cpp.o: CMakeFiles/Client.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/liam/Programming/C++/ServerClient/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/Client.dir/Entity.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/Client.dir/Entity.cpp.o -MF CMakeFiles/Client.dir/Entity.cpp.o.d -o CMakeFiles/Client.dir/Entity.cpp.o -c /Users/liam/Programming/C++/ServerClient/Entity.cpp
+CMakeFiles/Client.dir/Game.cpp.o: CMakeFiles/Client.dir/flags.make
+CMakeFiles/Client.dir/Game.cpp.o: /Users/liam/Programming/C++/ServerClient/Game.cpp
+CMakeFiles/Client.dir/Game.cpp.o: CMakeFiles/Client.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/liam/Programming/C++/ServerClient/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/Client.dir/Game.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/Client.dir/Game.cpp.o -MF CMakeFiles/Client.dir/Game.cpp.o.d -o CMakeFiles/Client.dir/Game.cpp.o -c /Users/liam/Programming/C++/ServerClient/Game.cpp
 
-CMakeFiles/Client.dir/Entity.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Client.dir/Entity.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/liam/Programming/C++/ServerClient/Entity.cpp > CMakeFiles/Client.dir/Entity.cpp.i
+CMakeFiles/Client.dir/Game.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Client.dir/Game.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/liam/Programming/C++/ServerClient/Game.cpp > CMakeFiles/Client.dir/Game.cpp.i
 
-CMakeFiles/Client.dir/Entity.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Client.dir/Entity.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/liam/Programming/C++/ServerClient/Entity.cpp -o CMakeFiles/Client.dir/Entity.cpp.s
+CMakeFiles/Client.dir/Game.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Client.dir/Game.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/liam/Programming/C++/ServerClient/Game.cpp -o CMakeFiles/Client.dir/Game.cpp.s
 
 # Object files for target Client
 Client_OBJECTS = \
 "CMakeFiles/Client.dir/main.cpp.o" \
 "CMakeFiles/Client.dir/Client.cpp.o" \
 "CMakeFiles/Client.dir/Server.cpp.o" \
-"CMakeFiles/Client.dir/Entity.cpp.o"
+"CMakeFiles/Client.dir/Game.cpp.o"
 
 # External object files for target Client
 Client_EXTERNAL_OBJECTS =
@@ -141,9 +141,10 @@ Client_EXTERNAL_OBJECTS =
 Client: CMakeFiles/Client.dir/main.cpp.o
 Client: CMakeFiles/Client.dir/Client.cpp.o
 Client: CMakeFiles/Client.dir/Server.cpp.o
-Client: CMakeFiles/Client.dir/Entity.cpp.o
+Client: CMakeFiles/Client.dir/Game.cpp.o
 Client: CMakeFiles/Client.dir/build.make
 Client: /opt/homebrew/Cellar/sdl2/2.32.10/lib/libSDL2.dylib
+Client: /opt/homebrew/Cellar/sdl2_image/2.8.8/lib/libSDL2_image.dylib
 Client: CMakeFiles/Client.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/liam/Programming/C++/ServerClient/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Linking CXX executable Client"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/Client.dir/link.txt --verbose=$(VERBOSE)

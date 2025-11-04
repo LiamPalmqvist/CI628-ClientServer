@@ -10,10 +10,13 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 
 # Find the standard SDL2 libraries installed on the system
 find_package(SDL2 REQUIRED)
+find_package(SDL2_Image REQUIRED)
 
 
 # include SDL header files
-include_directories(${SDL2_INCLUDE_DIRS}
+include_directories(
+        ${SDL2_INCLUDE_DIRS}
+#        ${SDL2_Image_INCLUDE_DIRS}
 )
 
 # load user source and header files
@@ -24,12 +27,13 @@ add_executable(${PROJECT_NAME} ${SOURCE_FILES}
         Client.h
         Server.cpp
         Server.h
-        Entity.cpp
-        Entity.h
+        Game.cpp
+        Game.h
 )
 
 target_link_libraries(${PROJECT_NAME}
         ${SDL2_LIBRARIES}
+        SDL2_image::SDL2_image
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${SDL2_INCLUDE_DIRS})
