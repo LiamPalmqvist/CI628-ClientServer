@@ -29,6 +29,8 @@ add_executable(${PROJECT_NAME} ${SOURCE_FILES}
         Server.h
         Game.cpp
         Game.h
+        GameObject.cpp
+        GameObject.h
 )
 
 target_link_libraries(${PROJECT_NAME}

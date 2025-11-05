@@ -51,14 +51,29 @@ struct ClientData {
     std::thread thread;
     std::shared_ptr<MessageQueue> messages;
     bool active = true;
+
+};
+
+struct ClientGameplayData
+{
+    int paddle_size_1[2];
+    int paddle_position_1[2];
+    int paddle_size_2[2];
+    int paddle_position_2[2];
+    int ball_size[2];
+    int ball_position[2];
+    int ball_rotation; // between 0 and 359
 };
 
 class Server
 {
 public:
+    ClientGameplayData data;
     int clientLength = 0;
     Server(const std::string &ipAddress, int port);
     void listenOnPort(const std::string &ipAddress, int port);
+    void processClients();
+    void decodeMessage(std::string *message);
     int connectClient(int sock, const std::shared_ptr<MessageQueue>& msgQueue);
     static bool validateIpAddress(const std::string &ipAddress);
     static bool validatePortNumber(const int &portNumber);

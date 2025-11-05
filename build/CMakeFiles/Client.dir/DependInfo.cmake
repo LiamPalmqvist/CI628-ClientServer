@@ -10,6 +10,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/Users/liam/Programming/C++/ServerClient/Client.cpp" "CMakeFiles/Client.dir/Client.cpp.o" "gcc" "CMakeFiles/Client.dir/Client.cpp.o.d"
   "/Users/liam/Programming/C++/ServerClient/Game.cpp" "CMakeFiles/Client.dir/Game.cpp.o" "gcc" "CMakeFiles/Client.dir/Game.cpp.o.d"
+  "/Users/liam/Programming/C++/ServerClient/GameObject.cpp" "CMakeFiles/Client.dir/GameObject.cpp.o" "gcc" "CMakeFiles/Client.dir/GameObject.cpp.o.d"
   "/Users/liam/Programming/C++/ServerClient/Server.cpp" "CMakeFiles/Client.dir/Server.cpp.o" "gcc" "CMakeFiles/Client.dir/Server.cpp.o.d"
   "/Users/liam/Programming/C++/ServerClient/main.cpp" "CMakeFiles/Client.dir/main.cpp.o" "gcc" "CMakeFiles/Client.dir/main.cpp.o.d"
   )

@@ -14,7 +14,8 @@ Server::Server(const std::string& ipAddress, int port)
     while (true)
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(second/20));
-        std::cout << clientLength << std::endl;
+        //std::cout << clientLength << std::endl;
+        processClients();
     }
 }
 
@@ -156,6 +157,7 @@ int Server::connectClient(int sock, const std::shared_ptr<MessageQueue>& msgQueu
     std::cout << clientLength << std::endl;
     int n; // return value for the read() and write() calls.
     char buffer[256];
+    int clientNumber;
     // the server reads characters from the socket connection into this buffer
 
     bool clientAssigned = false;
@@ -167,7 +169,7 @@ int Server::connectClient(int sock, const std::shared_ptr<MessageQueue>& msgQueu
 
         n = read(sock, buffer, sizeof(buffer));
 
-        std::cout << "buffer" << std::endl;
+        //std::cout << buffer << std::endl;
         if (n <= 0)
         {
             if (n == 0)
@@ -182,7 +184,6 @@ int Server::connectClient(int sock, const std::shared_ptr<MessageQueue>& msgQueu
             break;
         }
 
-        std::cout << "HELLO" << std::endl;
         if (!clientAssigned) {
             std::string msg = "assigned: " + std::to_string(clientLength);
             std::cout << msg << std::endl;
@@ -192,6 +193,7 @@ int Server::connectClient(int sock, const std::shared_ptr<MessageQueue>& msgQueu
                 perror("ERROR writing to socket");
                 close(sock);
             }
+            n = read(sock, buffer, sizeof(buffer));
             input = buffer;
             if (input.find("assigned: ") != std::string::npos)
                 clientAssigned = true;
@@ -200,8 +202,11 @@ int Server::connectClient(int sock, const std::shared_ptr<MessageQueue>& msgQueu
                 std::cout << false << std::endl;
             }
         } else {
-            std::cout << "Client assigned" << std::endl;
-            //printf("%s\n", buffer);
+            //std::cout << "Client assigned" << std::endl;
+            printf("%s\n", buffer);
+            input = buffer;
+
+            decodeMessage(&input);
 
             // Create JSON response and push to queue
             std::string json_response = "{\"message\": \"" + std::string(buffer) + "\"}";
@@ -224,6 +229,34 @@ int Server::connectClient(int sock, const std::shared_ptr<MessageQueue>& msgQueu
     std::cout << n << std::endl;
 
     return 1;
+}
+
+void Server::processClients()
+{
+
+}
+
+void Server::decodeMessage(std::string *message)
+{
+    int clientNumber;
+
+    std::cout << static_cast<int>(message->at(0)) << std::endl;
+
+    // int8_t number = std::stoi(*message) && 0b11000000;
+    //
+    //
+    // switch (number)
+    // {
+    // case 0b01000000:
+    //     clientNumber = 1;
+    //     break;
+    // case 0b10000000:
+    //     clientNumber = 2;
+    //     break;
+    // }
+
+
+
 }
 
 // returns true is IP Address is valid, false if not

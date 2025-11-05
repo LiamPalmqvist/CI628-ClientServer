@@ -24,6 +24,9 @@ class Client
 {
     enum class States {unassigned, assigned};
 public:
+    SDL_Renderer* renderer;
+    SDL_Window* window;
+
     // Threading information
     std::thread clientThread;
     bool threadRunning;
@@ -45,6 +48,7 @@ public:
 
     // Gets the player inputs while the SDL instance is running
     void input(SDL_Event &event);
+    void instantiateObjects();
     // =========== SDL FUNCTIONS ===========
 
     //

@@ -8,6 +8,8 @@
 #include <chrono>
 #include <thread>
 
+#include "Game.h"
+
 Client::Client(std::string ipAddress, int port)
 {
     int sockfd, portno, n;
@@ -141,6 +143,8 @@ void Client::checkForConnection(int sockfd, char buffer[256])
 	if (int index = output.find("assigned: "); index != std::string::npos) {
 		std::cout << output.back() << std::endl;
 		clientNumber = std::stoi(output.substr(output.size() - 1));
+		std::string message = "assigned: " + std::to_string(clientNumber);
+		n = write(sockfd, buffer, 255);
 		state = States::assigned;
 	}
 
@@ -208,7 +212,7 @@ int Client::setupSDL(int sockfd) {
 	}
 
 	// Start creating a window for SDL
-	SDL_Window* window = SDL_CreateWindow(
+	window = SDL_CreateWindow(
 		"Game",
 		SDL_WINDOWPOS_CENTERED,
 		SDL_WINDOWPOS_CENTERED,
@@ -224,7 +228,7 @@ int Client::setupSDL(int sockfd) {
 		return 0;
 	}
 
-	SDL_Renderer* renderer = SDL_CreateRenderer(
+	renderer = SDL_CreateRenderer(
 		window,
 		-1,
 		SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC
@@ -246,6 +250,9 @@ int Client::setupSDL(int sockfd) {
 	bool running = true;
 	SDL_Event event;
 
+	Game game(renderer);
+	game.createGameObjects(renderer);
+
 	while (running) {
 		// Process events
 		while (SDL_PollEvent(&event)) {
@@ -257,7 +264,7 @@ int Client::setupSDL(int sockfd) {
 			}
 		}
 
-		//game->render();
+		game.update(keys);
 
 		if (!threadRunning)
 		{
@@ -267,6 +274,7 @@ int Client::setupSDL(int sockfd) {
 		// render something (White background)
 		//SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 		SDL_RenderClear(renderer);
+		game.render(renderer);
 		SDL_RenderPresent(renderer);
 	}
 
@@ -307,6 +315,11 @@ void Client::input(SDL_Event &event)
 	default:
 		break;
 	}
+}
+
+void Client::instantiateObjects()
+{
+
 }
 
 // returns true is IP Address is valid, false if not
