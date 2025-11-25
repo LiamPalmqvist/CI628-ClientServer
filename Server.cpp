@@ -3,19 +3,28 @@
 //
 
 #include "Server.h"
+#include "ServerGame.h"
 #include <algorithm>
 #include <string>
 
 Server::Server(const std::string& ipAddress, int port)
 {
+    ServerGame game;
     std::thread listenThread(&Server::listenOnPort, this, ipAddress, port);
     //listenOnPort(ipAddress, port);
     int second = 1000;
     while (true)
     {
-        std::this_thread::sleep_for(std::chrono::milliseconds(second/20));
+        if (clientLength == 2)
+        {
+            game.playing = true;
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(second/60));
         //std::cout << clientLength << std::endl;
-        processClients();
+        if (game.playing)
+            game.update(p1keys, p2keys);
+        else
+            std::cout << "Not enough players" << std::endl;
     }
 }
 
@@ -25,7 +34,7 @@ void Server::listenOnPort(const std::string& ipAddress, int port) {
     // First, validate the IP and Port
     if (!(validateIpAddress(ipAddress) && validatePortNumber(port)))
     {
-        error("port ot IP address in wrong format");
+        error("port or IP address in wrong format");
     }
     else
     {
@@ -231,32 +240,37 @@ int Server::connectClient(int sock, const std::shared_ptr<MessageQueue>& msgQueu
     return 1;
 }
 
-void Server::processClients()
-{
-
-}
-
 void Server::decodeMessage(std::string *message)
 {
-    int clientNumber;
+    int clientNumber = 0;
 
     std::cout << static_cast<int>(message->at(0)) << std::endl;
 
-    // int8_t number = std::stoi(*message) && 0b11000000;
-    //
-    //
-    // switch (number)
-    // {
-    // case 0b01000000:
-    //     clientNumber = 1;
-    //     break;
-    // case 0b10000000:
-    //     clientNumber = 2;
-    //     break;
-    // }
+    std::bitset<8> number = std::stoi(*message) && 0b11000000;
 
+    std::bitset<2> header = (static_cast<char>(number[0]) + static_cast<char>(number[1]));
+    // Since this is only a 2 player game, we can use header.any()
+    // to check which player we are. If a bit is positive, it will mean
+    // that player is player 2
 
+    if (header.any())
+    {
+        clientNumber = 1;
+    }
 
+    for (int i = 2; i < 6; i++)
+    {
+        switch (clientNumber)
+        {
+        case 0:
+            p1keys[i] = number[i];
+            break;
+        case 1:
+            p2keys[i] = number[i];
+            break;
+        default:
+        }
+    }
 }
 
 // returns true is IP Address is valid, false if not
