@@ -68,11 +68,13 @@ struct ClientGameplayData
 class Server
 {
 public:
+    bool p1keys[6] = {false, false, false, false, false, false};
+    bool p2keys[6] = {false, false, false, false, false, false};
+
     ClientGameplayData data;
     int clientLength = 0;
     Server(const std::string &ipAddress, int port);
     void listenOnPort(const std::string &ipAddress, int port);
-    void processClients();
     void decodeMessage(std::string *message);
     int connectClient(int sock, const std::shared_ptr<MessageQueue>& msgQueue);
     static bool validateIpAddress(const std::string &ipAddress);
