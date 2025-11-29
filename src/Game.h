@@ -1,0 +1,96 @@
+//
+// Created by Liam on 29/11/2025.
+//
+
+#ifndef CLIENT_GAME_H
+#define CLIENT_GAME_H
+
+
+#include <iostream>
+
+
+// Since base gameObjects don't need to be initialised,
+// and it will only ever be inherited,
+// We don't need an initialiser for this class
+class GameObject
+{
+public:
+    // Variables
+    int _xPos;
+    int _yPos;
+    int _speed;
+
+    // Functions
+    int get_x_pos() const { return _xPos; }
+    int get_y_pos() const { return _yPos; }
+    int get_speed() const { return _speed; }
+
+    void set_x_pos(const int xPos) { _xPos = xPos; }
+    void set_y_pos(const int yPos) { _yPos = yPos; }
+    void set_speed(const int speed) { _speed = speed; }
+};
+
+class Paddle : public GameObject
+{
+    // Private variables
+    int _xSize;
+    int _ySize;
+
+public:
+    // Public initialiser
+    explicit Paddle(int player);
+    Paddle(int xPos, int yPos, int xSize, int ySize);
+
+    // Public functions
+    int get_xSize() const { return _xSize; }
+    int get_ySize() const { return _ySize; }
+
+    void set_xSize(const int xSize) { _xSize = xSize; }
+    void set_ySize(const int ySize) { _ySize = ySize; }
+};
+
+class Ball : public GameObject
+{
+    // Private variables
+    int _radius;
+    int _direction;
+public:
+    // Public initialiser
+    Ball();
+    Ball(int xPos, int yPos, int size);
+
+    // Public functions
+    int get_radius() const { return _radius; }
+    int get_direction() const { return _direction; }
+
+    void set_radius(const int radius) { _radius = radius; }
+    void set_direction(const int direction) { _direction = direction; }
+    void set_xy_pos(const int xPos, const int yPos) { _xPos = xPos; _yPos = yPos; }
+};
+
+class Game
+{
+    // Private variables
+    Paddle p1Paddle;
+    Paddle p2Paddle;
+    Ball ball;
+    int p1Points = 0;
+    int p2Points = 0;
+
+    // Private methods
+    void checkCollisions();
+
+public:
+    // Public variables
+    bool playing;
+
+    // Public initialiser
+    Game();
+
+    // Public functions and methods
+    std::string encodeData();
+    void update(const bool p1keys[6], const bool p2keys[6]);
+};
+
+
+#endif //CLIENT_GAME_H
