@@ -9,6 +9,7 @@
 #include <iostream>
 
 
+
 // Since base gameObjects don't need to be initialised,
 // and it will only ever be inherited,
 // We don't need an initialiser for this class
@@ -88,7 +89,9 @@ public:
     Game();
 
     // Public functions and methods
-    std::string encodeData();
+    int* encodeData();
+    void decodeData(int * data);
+    void printData();
     void update(const bool p1keys[6], const bool p2keys[6]);
 };
 

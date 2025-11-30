@@ -5,29 +5,29 @@
 #include <iostream>
 #include <thread>
 #include <unistd.h>
+#include <SDL2/SDL.h>
 
+#include "Game.h"
 
 class Client {
-    // Private enumerator
-    enum class State
-    {
-        unassigned,
-        assigned
-    };
-
     // Private variables
     bool connected;
     std::thread listeningThread;
     std::thread sendingThread;
+    bool assigned = false;
     int clientID;
-    State state;
+
+    Game game;
 
     // Private functions
     static bool validateIpAddress(const std::string &ipAddress);
     static bool validatePortNumber(const int &portNumber);
+    std::string tryRecvStringFromServer(int sockfd);
+    int* tryRecvIntFromServer(int sockfd);
+    void tryWriteToServer(int sockfd, const std::string& message);
     void listenToServer(int sockfd);
     void sendToServer(int sockfd);
 public:
     // Public constructor
-    Client(std::string ipAddress, int port);
+    Client(const std::string& ipAddress, int port);
 };

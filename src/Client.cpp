@@ -2,7 +2,7 @@
 #include "Window.h"
 
 
-Client::Client(const std::string ipAddress, const int port)
+Client::Client(const std::string& ipAddress, const int port)
 {
     int sockfd, portno, n;
     struct sockaddr_in serv_addr;
@@ -69,7 +69,8 @@ Client::Client(const std::string ipAddress, const int port)
     listeningThread = std::thread(&Client::listenToServer, this, sockfd);
     sendingThread = std::thread(&Client::sendToServer, this, sockfd);
 
-    Window window;
+    const Game game;
+    const Window window;
 
     if (!window.windowIsOpen)
     {
@@ -81,53 +82,106 @@ Client::Client(const std::string ipAddress, const int port)
 
 void Client::listenToServer(int sockfd)
 {
-    char buffer[256];
     std::string buffer_str;
+    int* buffer_int;
     while (connected)
     {
-        int n = recv(sockfd, buffer, sizeof(buffer), 0);
-
-        if (n <= 0)
+        if (!assigned)
         {
-            if (n == 0)
+            std::cout << "Trying to assign to Client ID" << std::endl;
+            buffer_str = tryRecvStringFromServer(sockfd);
+            if (buffer_str.length() != 0)
             {
-                std::cout << "Client disconnected" << std::endl;
+                // std::cout << buffer_str << std::endl;
+                clientID = std::stoi(buffer_str);
+                assigned = true;
             }
-            else
-            {
-                std::cout << "Error reading from socket" << std::endl;
-            }
-            connected = false;
-            close(sockfd);
-            return;
-        }
+            tryWriteToServer(sockfd, buffer_str);
 
-        buffer_str = buffer;
-        if (buffer_str.length() != 0)
+            bzero(buffer_str.data(), buffer_str.length());
+        } else
         {
-            std::cout << buffer_str << std::endl;
+            std::cout << "Trying to recieve int array from server" << std::endl;
+            buffer_int = tryRecvIntFromServer(sockfd);
+            game.decodeData(buffer_int);
+            game.printData();
         }
-        bzero(buffer_str.data(), buffer_str.length());
+    }
+}
+
+std::string Client::tryRecvStringFromServer(const int sockfd)
+{
+    char buffer[256];
+
+    if (const int n = recv(sockfd, buffer, sizeof(buffer), 0); n <= 0)
+    {
+        if (n == 0)
+        {
+            std::cout << "Client disconnected" << std::endl;
+        }
+        else
+        {
+            std::cout << "Error reading from socket" << std::endl;
+        }
+        connected = false;
+        close(sockfd);
+    }
+
+    return buffer;
+}
+
+int* Client::tryRecvIntFromServer(const int sockfd)
+{
+    std::cout << "Trying to read from socket" << std::endl;
+
+    static int buffer[17];
+    if (const int n = recv(sockfd, buffer, sizeof(buffer), 0); n <= 0)
+    {
+        if (n == 0)
+        {
+            std::cout << "Client disconnected" << std::endl;
+        }
+        else
+        {
+            std::cout << "Error reading from socket" << std::endl;
+        }
+        connected = false;
+        close(sockfd);
+    }
+
+    // std::cout << "BUFFER: " << std::endl;
+    // std::string str = "";
+    // int i = 0;
+    // for (i; i < 16; i++)
+    // {
+    //     str += std::to_string(buffer[i]) + ", ";
+    // }
+    // str += std::to_string(buffer[i+1]);
+    // std::cout << str << std::endl;
+    // std::cout << "END BUFFER" << std::endl;
+
+    return buffer;
+}
+
+void Client::tryWriteToServer(const int sockfd, const std::string& message)
+{
+    if (int n = write(sockfd, &message, sizeof(message)); n < 0)
+    {
+        std::cout << "Error writing to socket" << std::endl;
+        close(sockfd);
+        connected = false;
     }
 }
 
 void Client::sendToServer(int sockfd)
 {
-    int n;
     char message[256];
 
     while (connected)
     {
         fgets(message, sizeof(message), stdin);
         message[strcspn(message, "\n")] = 0;
-        n = write(sockfd, &message, sizeof(message));
-
-        if (n < 0)
-        {
-            std::cout << "Error writing to socket" << std::endl;
-            close(sockfd);
-            break;
-        }
+        tryWriteToServer(sockfd, message);
     }
 }
 
@@ -142,4 +196,3 @@ bool Client::validatePortNumber(const int& portNumber)
 {
     return (portNumber > 0 && portNumber < 65535);
 }
-

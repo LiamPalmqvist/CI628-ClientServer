@@ -8,19 +8,23 @@
 #include <mutex>
 //#include <uuid/uuid.h>
 
+#include "Game.h"
+
 class ClientData {
 public:
 
     // Public variables
-    long clientID;
+    int clientID;
     int sockfd;
     std::thread thread;
     bool active = true;
+    bool assigned = false;
     std::string latestMessage = "";
     std::string previousMessage = "";
 
     // Public functions
-    bool writeToConnection(const std::string &message) const;
+    bool writeStringToConnection(const std::string message) const;
+    bool writeIntToConnection(const int* message) const;
 };
 
 class Server {
@@ -33,6 +37,8 @@ class Server {
     std::mutex clientsMutex;
     // End of Claude correction code
 
+    Game game;
+
 public:
 
     // Public functions
@@ -41,6 +47,7 @@ public:
     int connectClient(int sock, ClientData &client);
     static bool validateIpAddress(const std::string &ipAddress);
     static bool validatePortNumber(const int &portNumber);
-    void broadcastMessage(const std::string &message, long excludeClientId = -1);
+    void broadcastStringMessage(const std::string message, long excludeClientId = -1);
+    void broadcastIntMessage(const int* message, long excludeClientId = -1);
 };
 

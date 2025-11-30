@@ -4,6 +4,8 @@
 
 #include "Window.h"
 
+#include "Game.h"
+
 Window::Window()
 {
     // Check if we can create an SDL Window
@@ -51,6 +53,8 @@ Window::Window()
 
     // Finally, we get to the main loop
     SDL_Event event;
+
+    Game game;
 
     while (windowIsOpen)
     {

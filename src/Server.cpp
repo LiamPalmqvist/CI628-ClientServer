@@ -1,5 +1,4 @@
 #include "Server.h"
-#include "Game.h"
 
 Server::Server(const std::string& ipAddress, int port)
 {
@@ -9,7 +8,7 @@ Server::Server(const std::string& ipAddress, int port)
     {
         if (clientsConnected == 2)
         {
-
+            //game.playing = true;
         }
     }
 }
@@ -86,7 +85,11 @@ void Server::listenToPort(const std::string& ipAddress, int port)
         // Claude correction code
         // Create the client add it to the list *before* anything else
         ClientData newClient;
-        newClient.clientID = random();
+
+        // set the seed for the random client ID based on the time
+        std::srand(std::time({}));
+        newClient.clientID = rand();
+
         newClient.sockfd = newsockfd;
 
         int index = clientThreads.size();
@@ -155,51 +158,103 @@ int Server::connectClient(int sockfd, ClientData &client)
     int retval = getsockopt(sockfd, SOL_SOCKET, SO_ERROR, &error, &len);
     std::cout << "getsockopt returned: " << retval << ", error: " << error << std::endl;
 
+    int* buffer_int;
+
     while (sockfd > 0)
     {
-        bzero(buffer, sizeof(buffer));
-        buffer_str = "";
+        if (!client.assigned) {
+            std::cout << "Client number is being assigned" << std::endl;
+            const std::string assignment = std::to_string(client.clientID);
+            n = send(sockfd, assignment.c_str(), sizeof(assignment), 0);
+            std::cout << assignment << std::endl;
+            n = recv(sockfd, buffer, sizeof(buffer), 0);
+            std::cout << buffer << std::endl;
+            buffer_str = buffer;
+            if (buffer_str == assignment)
+            {
+                client.assigned = true;
+                std::cout << "Client number assigned" << std::endl;
+            } else
+            {
+                std::cout << "Client number was not assigned" << std::endl;
+            }
 
-        n = recv(sockfd, buffer, sizeof(buffer), 0);
-        // std::cout << "Read from connection once" << std::endl;
-
-        buffer_str = buffer;
-        if (buffer_str.length() != 0)
+            if (n <= 0)
+            {
+                if (n == 0)
+                {
+                    std::cout << "Client disconnected" << std::endl;
+                    clientsConnected--;
+                }
+                else
+                {
+                    std::cout << "Error reading from socket" << std::endl;
+                    clientsConnected--;
+                }
+                close(sockfd);
+            }
+        } else
         {
-            std::cout << buffer_str << std::endl;
-            client.latestMessage = buffer_str;
+            bzero(buffer, sizeof(buffer));
             buffer_str = "";
-        }
 
-        if (n <= 0)
-        {
-            if (n == 0)
-            {
-                std::cout << "Client disconnected" << std::endl;
-                clientsConnected--;
-            }
-            else
-            {
-                std::cout << "Error reading from socket" << std::endl;
-                clientsConnected--;
-            }
-            close(sockfd);
-            break;
-        }
+            std::cout << "Client ID: " << client.clientID << std::endl;
+            n = recv(sockfd, buffer, sizeof(buffer), 0);
+            // std::cout << "Read from connection once" << std::endl;
 
-        if (client.latestMessage != client.previousMessage)
-        {
-            std::cout << client.latestMessage << std::endl;
-            client.previousMessage = client.latestMessage;
-            for (int i = 0; i < clientsConnected; i++)
+            buffer_str = buffer;
+            if (buffer_str.length() != 0)
             {
-                // if (clientThreads[i].active && clientThreads[i].clientID != client.clientID)
-                // {
-                std::cout << "Trying to write to client" << std::endl;
-                clientThreads[i].writeToConnection(client.latestMessage);
-                std::cout << "Written to socket" << std::endl;
-                // }
+                std::cout << buffer_str << std::endl;
+                client.latestMessage = buffer_str;
+                buffer_str = "";
             }
+
+            if (n <= 0)
+            {
+                if (n == 0)
+                {
+                    std::cout << "Client " + std::to_string(client.clientID) + " disconnected" << std::endl;
+                    clientsConnected--;
+                }
+                else
+                {
+                    std::cout << "Error reading from socket" << std::endl;
+                    clientsConnected--;
+                }
+                close(sockfd);
+                break;
+            }
+
+            // if (game.playing)
+            // {
+                buffer_int = game.encodeData();
+
+                std::string str = "";
+                int i = 0;
+                for (i; i < 16; i++)
+                {
+                    str += std::to_string(buffer_int[i]) + ", ";
+                }
+                str += std::to_string(buffer_int[i+1]);
+                std::cout << "sending "  + str << std::endl;
+                broadcastIntMessage(buffer_int);
+            //}
+
+            // if (client.latestMessage != client.previousMessage)
+            // {
+            //     std::cout << client.latestMessage << std::endl;
+            //     client.previousMessage = client.latestMessage;
+            //     for (int i = 0; i < clientsConnected; i++)
+            //     {
+            //         // if (clientThreads[i].active && clientThreads[i].clientID != client.clientID)
+            //         // {
+            //         std::cout << "Trying to write to client" << std::endl;
+            //         clientThreads[i].writeToConnection(client.latestMessage);
+            //         std::cout << "Written to socket" << std::endl;
+            //         // }
+            //     }
+            // }
         }
     }
 
@@ -207,7 +262,7 @@ int Server::connectClient(int sockfd, ClientData &client)
 }
 
 // Claude code
-void Server::broadcastMessage(const std::string &message, long excludeClientId)
+void Server::broadcastStringMessage(const std::string message, long excludeClientId)
 {
     // A lock guard is created in order to automatically
     // lock and unlock a specific thread's data
@@ -219,7 +274,24 @@ void Server::broadcastMessage(const std::string &message, long excludeClientId)
     {
         if (client.active && client.clientID != excludeClientId)
         {
-            client.writeToConnection(message);
+            client.writeStringToConnection(message);
+        }
+    }
+}
+
+void Server::broadcastIntMessage(const int* message, long excludeClientId)
+{
+    // A lock guard is created in order to automatically
+    // lock and unlock a specific thread's data
+    // This prevents data races and collisions from occuring on
+    // multiple threads trying to access the same data
+    std::lock_guard lock(clientsMutex);
+
+    for (auto& client : clientThreads)
+    {
+        if (client.active && client.clientID != excludeClientId)
+        {
+            client.writeIntToConnection(message);
         }
     }
 }
@@ -255,16 +327,37 @@ bool Server::validatePortNumber(const int& portNumber)
 // End of old code
 
 // Claude code
-bool ClientData::writeToConnection(const std::string &message) const
+bool ClientData::writeIntToConnection(const int* message) const
 {
-    std::cout << message.c_str() << std::endl;
-    const char* buffer = message.c_str();
-    size_t totalSent = 0;
+    int arr[17];
+    for (int i = 0; i < 17; i++)
+    {
+        arr[i] = message[i];
+    }
+    //size_t totalSent = 0;
+    const size_t messageLen = sizeof(arr);
+
+    //while (totalSent < messageLen)
+    //{
+        //const ssize_t sent = send(sockfd, message + totalSent, messageLen - totalSent, MSG_NOSIGNAL);
+
+        const ssize_t sent = write(sockfd, arr, messageLen);
+
+        //totalSent += sent;
+    //}
+
+    return true;
+}
+
+bool ClientData::writeStringToConnection(const std::string message) const
+{
+    const char* message_char = message.c_str();
     const size_t messageLen = sizeof(message);
+    size_t totalSent = 0;
 
     while (totalSent < messageLen)
     {
-        const ssize_t sent = send(sockfd, buffer + totalSent, messageLen - totalSent, MSG_NOSIGNAL);
+        const ssize_t sent = send(sockfd, message_char + totalSent, messageLen - totalSent, MSG_NOSIGNAL);
 
         if (sent < 0)
         {

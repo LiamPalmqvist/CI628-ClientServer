@@ -15,6 +15,7 @@ Paddle::Paddle(const int player)
     _yPos = 300;
     _xSize = 10;
     _ySize = 30;
+    _speed = 10;
 }
 
 Paddle::Paddle(const int xPos, const int yPos, const int xSize, const int ySize)
@@ -31,6 +32,7 @@ Ball::Ball()
     _yPos = 200;
     _radius = 10;
     _direction = 20;
+    _speed = 10;
 }
 
 Ball::Ball(const int xPos, const int yPos, const int size)
@@ -39,11 +41,12 @@ Ball::Ball(const int xPos, const int yPos, const int size)
     _yPos = yPos;
     _radius = size;
     _direction = 20;
+    _speed = 10;
 }
 
 Game::Game() : p1Paddle(0), p2Paddle(1), ball()
 {
-    playing = true;
+    playing = false;
 }
 
 void Game::update(const bool p1keys[6], const bool p2keys[6])
@@ -171,28 +174,28 @@ void Game::checkCollisions()
     }
 }
 
-std::string Game::encodeData()
+int* Game::encodeData()
 {
     // get information about the paddles
-    const std::string p1x = std::to_string(p1Paddle.get_x_pos());
-    const std::string p1y = std::to_string(p1Paddle.get_y_pos());
-    const std::string p1speed = std::to_string(p1Paddle.get_speed());
-    const std::string p1xSize = std::to_string(p1Paddle.get_xSize());
-    const std::string p1ySize = std::to_string(p1Paddle.get_ySize());
+    const int p1x = p1Paddle.get_x_pos();
+    const int p1y = p1Paddle.get_y_pos();
+    const int p1speed = p1Paddle.get_speed();
+    const int p1xSize = p1Paddle.get_xSize();
+    const int p1ySize = p1Paddle.get_ySize();
 
-    const std::string p2x = std::to_string(p2Paddle.get_x_pos());
-    const std::string p2y = std::to_string(p2Paddle.get_y_pos());
-    const std::string p2speed = std::to_string(p2Paddle.get_speed());
-    const std::string p2xSize = std::to_string(p2Paddle.get_xSize());
-    const std::string p2ySize = std::to_string(p2Paddle.get_ySize());
+    const int p2x = p2Paddle.get_x_pos();
+    const int p2y = p2Paddle.get_y_pos();
+    const int p2speed = p2Paddle.get_speed();
+    const int p2xSize = p2Paddle.get_xSize();
+    const int p2ySize = p2Paddle.get_ySize();
 
-    const std::string ballX = std::to_string(ball.get_x_pos());
-    const std::string ballY = std::to_string(ball.get_y_pos());
-    const std::string ballSpeed = std::to_string(ball.get_speed());
-    const std::string ballRadius = std::to_string(ball.get_radius());
-    const std::string rotation = std::to_string(ball.get_direction());
+    const int ballX = ball.get_x_pos();
+    const int ballY = ball.get_y_pos();
+    const int ballSpeed = ball.get_speed();
+    const int ballRadius = ball.get_radius();
+    const int ballRotation = ball.get_direction();
 
-    std::string jsonTemplate = "{"
+    /*std::string jsonTemplate = "{"
         "\"p1\" : {"
         "\"xpos\" : " + p1x + ","
         "\"ypos\" : " + p1y + ","
@@ -217,6 +220,83 @@ std::string Game::encodeData()
         "\"direction\" : " + rotation +
         "}"
         "}";
+*/
+    static int data[17] = {p1x, p1y, p1speed, p1xSize, p1ySize, p2x, p2y, p2speed, p2xSize, p2ySize, ballX, ballY, ballSpeed, ballRadius, ballX, ballRotation};
+    return data;
+}
 
-    return jsonTemplate;
+void Game::decodeData(int* data)
+{
+    for (int i = 0; i < 17; i++)
+    {
+        std::cout << std::to_string(data[i]) + ", ";
+    } std::cout << std::endl;
+
+    p1Paddle.set_x_pos(data[0]);
+    p1Paddle.set_y_pos(data[1]);
+    p1Paddle.set_speed(data[2]);
+    p1Paddle.set_xSize(data[3]);
+    p1Paddle.set_ySize(data[4]);
+    p1Points = data[5];
+
+    p2Paddle.set_x_pos(data[6]);
+    p2Paddle.set_y_pos(data[7]);
+    p2Paddle.set_speed(data[8]);
+    p2Paddle.set_xSize(data[9]);
+    p2Paddle.set_ySize(data[10]);
+    p2Points = data[11];
+
+    ball.set_x_pos(data[12]);
+    ball.set_y_pos(data[13]);
+    ball.set_speed(data[14]);
+    ball.set_radius(data[15]);
+    ball.set_direction(data[16]);
+}
+
+void Game::printData()
+{
+    // get information about the paddles
+    const std::string p1x = std::to_string(p1Paddle.get_x_pos());
+    const std::string p1y = std::to_string(p1Paddle.get_y_pos());
+    const std::string p1speed = std::to_string(p1Paddle.get_speed());
+    const std::string p1xSize = std::to_string(p1Paddle.get_xSize());
+    const std::string p1ySize = std::to_string(p1Paddle.get_ySize());
+    const std::string p2x = std::to_string(p2Paddle.get_x_pos());
+    const std::string p2y = std::to_string(p2Paddle.get_y_pos());
+    const std::string p2speed = std::to_string(p2Paddle.get_speed());
+    const std::string p2xSize = std::to_string(p2Paddle.get_xSize());
+    const std::string p2ySize = std::to_string(p2Paddle.get_ySize());
+    const std::string ballX = std::to_string(ball.get_x_pos());
+    const std::string ballY = std::to_string(ball.get_y_pos());
+    const std::string ballSpeed = std::to_string(ball.get_speed());
+    const std::string ballRadius = std::to_string(ball.get_radius());
+    const std::string ballRotation = std::to_string(ball.get_direction());
+
+    std::string jsonTemplate = "{\n"
+        "\t\"p1\" : {\n"
+        "\t\t\"xpos\" : " + p1x + ",\n"
+        "\t\t\"ypos\" : " + p1y + ",\n"
+        "\t\t\"speed\" : " + p1speed + ",\n"
+        "\t\t\"sizex\" : " + p1xSize + ",\n"
+        "\t\t\"sizey\" : " + p1ySize + ",\n"
+        "\t\t\"points\" : " + std::to_string(p1Points) + "\n" +
+        "\t},\n"
+        "\t\"p2\" : {\n"
+        "\t\t\"xpos\" : " + p2x + ",\n"
+        "\t\t\"ypos\" : " + p2y + ",\n"
+        "\t\t\"speed\" : " + p2speed + ",\n"
+        "\t\t\"sizex\" : " + p2xSize + ",\n"
+        "\t\t\"sizey\" : " + p2ySize + ",\n"
+        "\t\t\"points\" : " + std::to_string(p2Points) + "\n" +
+        "\t},\n"
+        "\t\"ball\" : {\n"
+        "\t\t\"xpos\" : " + ballX + ",\n"
+        "\t\t\"ypos\" : " + ballY + ",\n"
+        "\t\t\"speed\" : " + ballSpeed + ",\n"
+        "\t\t\"radius\" : " + ballRadius + ",\n"
+        "\t\t\"direction\" : " + ballRotation + + "\n" +
+        "\t}\n"
+        "}\n";
+
+    std::cout << jsonTemplate << std::endl;
 }
