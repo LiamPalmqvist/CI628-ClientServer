@@ -49,7 +49,7 @@ Game::Game() : p1Paddle(0), p2Paddle(1), ball()
     playing = false;
 }
 
-void Game::update(const bool p1keys[6], const bool p2keys[6])
+void Game::update(const bool p1keys[2], const bool p2keys[2])
 {
     // First, we check how many points each player has
     // if either player has 10 points, end the game

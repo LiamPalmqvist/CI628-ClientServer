@@ -4,6 +4,7 @@
 
 Client::Client(const std::string& ipAddress, const int port)
 {
+    // variables are defined here for clarity
     int sockfd, portno, n;
     struct sockaddr_in serv_addr;
     struct hostent* server;
@@ -58,7 +59,7 @@ Client::Client(const std::string& ipAddress, const int port)
     // This code sets the fields in serv_addr. Much of it is the same as in the server. However, because the field server->h_addr is a character string we use the function:
     // void bcopy(char *s1, char *s2, int length) which copies length bytes from s1 to s2
 
-    if (connect(sockfd, (const struct sockaddr*)&serv_addr, sizeof(serv_addr)) < 0)
+    if (connect(sockfd, reinterpret_cast<const struct sockaddr*>(&serv_addr), sizeof(serv_addr)) < 0)
     {
         std::cout << "Error connecting" << std::endl;
         return;
@@ -69,8 +70,7 @@ Client::Client(const std::string& ipAddress, const int port)
     listeningThread = std::thread(&Client::listenToServer, this, sockfd);
     sendingThread = std::thread(&Client::sendToServer, this, sockfd);
 
-    const Game game;
-    const Window window;
+    window.init();
 
     if (!window.windowIsOpen)
     {
@@ -80,7 +80,7 @@ Client::Client(const std::string& ipAddress, const int port)
     }
 }
 
-void Client::listenToServer(int sockfd)
+void Client::listenToServer(const int sockfd)
 {
     std::string buffer_str;
     int* buffer_int;
@@ -90,6 +90,7 @@ void Client::listenToServer(int sockfd)
         {
             std::cout << "Trying to assign to Client ID" << std::endl;
             buffer_str = tryRecvStringFromServer(sockfd);
+            std::cout << "Client ID: " << buffer_str << std::endl;
             if (buffer_str.length() != 0)
             {
                 // std::cout << buffer_str << std::endl;
@@ -97,6 +98,7 @@ void Client::listenToServer(int sockfd)
                 assigned = true;
             }
             tryWriteToServer(sockfd, buffer_str);
+            std::cout << "Sending Client ID back to server" << std::endl;
 
             bzero(buffer_str.data(), buffer_str.length());
         } else
@@ -105,10 +107,14 @@ void Client::listenToServer(int sockfd)
             buffer_int = tryRecvIntFromServer(sockfd);
             game.decodeData(buffer_int);
             game.printData();
+            bzero(buffer_int, sizeof(int)*17);
+            // We can do this because we know the size of the data coming over
+            // exactly
         }
     }
 }
 
+// Disable with comment
 std::string Client::tryRecvStringFromServer(const int sockfd)
 {
     char buffer[256];
@@ -163,32 +169,44 @@ int* Client::tryRecvIntFromServer(const int sockfd)
     return buffer;
 }
 
+void Client::sendToServer(int sockfd)
+{
+    std::string message;
+    //char buffer[256];
+    message = std::to_string(window.keys[0]) + std::to_string(window.keys[1]);
+    //std::cout << message << std::endl;
+    while (connected)
+    {
+        if (assigned)
+            tryWriteToServer(sockfd, message);
+        //if (game.playing)
+        //{
+        //}
+    }
+    // while (connected)
+    // {
+    //     fgets(buffer, sizeof(buffer), stdin);
+    //     message[strcspn(buffer, "\n")] = 0;
+    //     tryWriteToServer(sockfd, message);
+    // }
+}
+
+// Disable warning
 void Client::tryWriteToServer(const int sockfd, const std::string& message)
 {
-    if (int n = write(sockfd, &message, sizeof(message)); n < 0)
+    if (const int n = write(sockfd, &message, sizeof(message)); n < 0)
     {
         std::cout << "Error writing to socket" << std::endl;
         close(sockfd);
         connected = false;
     }
-}
-
-void Client::sendToServer(int sockfd)
-{
-    char message[256];
-
-    while (connected)
-    {
-        fgets(message, sizeof(message), stdin);
-        message[strcspn(message, "\n")] = 0;
-        tryWriteToServer(sockfd, message);
-    }
+    std::cout << "Wrote " << message << " to server" << std::endl;
 }
 
 bool Client::validateIpAddress(const std::string& ipAddress)
 {
     struct sockaddr_in sa;
-    int result = inet_pton(AF_INET, ipAddress.c_str(), &(sa.sin_addr));
+    const int result = inet_pton(AF_INET, ipAddress.c_str(), &(sa.sin_addr));
     return result != 0;
 }
 

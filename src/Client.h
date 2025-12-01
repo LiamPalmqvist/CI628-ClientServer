@@ -8,6 +8,7 @@
 #include <SDL2/SDL.h>
 
 #include "Game.h"
+#include "Window.h"
 
 class Client {
     // Private variables
@@ -18,6 +19,7 @@ class Client {
     int clientID;
 
     Game game;
+    Window window;
 
     // Private functions
     static bool validateIpAddress(const std::string &ipAddress);

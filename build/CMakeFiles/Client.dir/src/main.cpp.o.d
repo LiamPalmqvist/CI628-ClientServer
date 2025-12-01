@@ -783,6 +783,7 @@ CMakeFiles/Client.dir/src/main.cpp.o: \
   /usr/local/include/SDL2/SDL_locale.h \
   /usr/local/include/SDL2/SDL_misc.h \
   /Users/liam/Programming/C++/CleanServerClient/src/Game.h \
+  /Users/liam/Programming/C++/CleanServerClient/src/Window.h \
   /Users/liam/Programming/C++/CleanServerClient/src/Server.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/vector \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__vector/comparison.h \

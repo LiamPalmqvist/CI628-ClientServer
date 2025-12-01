@@ -16,9 +16,11 @@ public:
     // Public variables
     int clientID;
     int sockfd;
+    int index;
     std::thread thread;
     bool active = true;
     bool assigned = false;
+    int returnedClientID;
     std::string latestMessage = "";
     std::string previousMessage = "";
 
@@ -37,7 +39,13 @@ class Server {
     std::mutex clientsMutex;
     // End of Claude correction code
 
+    int playerOneID;
+    int playerTwoID;
+    bool p1Keys[2] = {false, false};
+    bool p2Keys[2] = {false, false};
+
     Game game;
+
 
 public:
 
@@ -49,5 +57,6 @@ public:
     static bool validatePortNumber(const int &portNumber);
     void broadcastStringMessage(const std::string message, long excludeClientId = -1);
     void broadcastIntMessage(const int* message, long excludeClientId = -1);
+    void decodeData(int sockfd);
 };
 

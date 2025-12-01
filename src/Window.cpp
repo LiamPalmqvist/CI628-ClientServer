@@ -6,8 +6,7 @@
 
 #include "Game.h"
 
-Window::Window()
-{
+void Window::init() {
     // Check if we can create an SDL Window
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
         std::cout << "SDL_Init Error: " << SDL_GetError() << std::endl;
@@ -66,7 +65,10 @@ Window::Window()
             }
         }
 
+        // Updating positions of objects goes here
+
         SDL_RenderClear(renderer);
+        // Render call goes here
         SDL_RenderPresent(renderer);
     }
 
@@ -90,4 +92,9 @@ void Window::getInputs(SDL_Event &event)
     default:
         break;
     }
+}
+
+void Window::instantiateGameObjects()
+{
+
 }

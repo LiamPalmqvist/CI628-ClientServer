@@ -10,15 +10,18 @@
 
 class Window
 {
-    SDL_Window* window;
-    SDL_Renderer* renderer;
+    SDL_Window* window = nullptr;
+    SDL_Renderer* renderer = nullptr;
     void getInputs(SDL_Event &event);
+
 public:
     // Since we only need two keys (up and down)
     //              W      S
     bool keys[2] = {false, false};
     bool windowIsOpen = true;
-    Window();
+    void init();
+    void instantiateGameObjects();
+    void renderGameObjects();
 };
 
 

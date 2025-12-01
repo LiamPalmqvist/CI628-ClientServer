@@ -3681,6 +3681,7 @@ CMakeFiles/Client.dir/src/main.cpp.o: /Users/liam/Programming/C++/CleanServerCli
   /Users/liam/Programming/C++/CleanServerClient/src/Client.h \
   /Users/liam/Programming/C++/CleanServerClient/src/Game.h \
   /Users/liam/Programming/C++/CleanServerClient/src/Server.h \
+  /Users/liam/Programming/C++/CleanServerClient/src/Window.h \
   /usr/local/include/SDL2/SDL.h \
   /usr/local/include/SDL2/SDL_assert.h \
   /usr/local/include/SDL2/SDL_atomic.h \

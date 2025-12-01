@@ -29,6 +29,7 @@ void Server::listenToPort(const std::string& ipAddress, int port)
         str_port = std::to_string(port);
     }
 
+    // setup variables for client connection
     int sockfd,
         newsockfd,
         portno,
@@ -37,6 +38,7 @@ void Server::listenToPort(const std::string& ipAddress, int port)
     struct sockaddr_in serv_addr,
                        cli_addr;
 
+    // Create a socket file descriptor for which to accept incoming connections
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0)
     {
@@ -44,6 +46,7 @@ void Server::listenToPort(const std::string& ipAddress, int port)
         threadListening = false;
     }
 
+    // clear the server's address to assign appropriate information
     bzero((char*)&serv_addr, sizeof(serv_addr));
     portno = std::atoi(str_port.data());
 
@@ -51,27 +54,32 @@ void Server::listenToPort(const std::string& ipAddress, int port)
     serv_addr.sin_port = htons(portno);
     serv_addr.sin_addr.s_addr = INADDR_ANY;
 
+    // Bind the server information to the socket file descriptor
     if (bind(sockfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) < 0)
     {
         std::cout << "Error: Could not bind" << std::endl;
         threadListening = false;
     }
 
-    std::cout << "Started listening" << std::endl;
+    // Start listening for incoming connections
     listen(sockfd, 5);
-    std::cout << "Listening for clients" << std::endl;
 
     clilen = sizeof(cli_addr);
 
+    // While listening for incoming connections
     while (threadListening)
     {
+        // if a client is requesting to connect, accept the connection
         newsockfd = accept(sockfd, (struct sockaddr*)&cli_addr, (socklen_t*)&clilen);
+        // if the amount of clients connected already exceeds the limit
         if (clientsConnected >= 3)
         {
+            // close the connection and break out of the loop
             close(newsockfd);
             break;
         }
 
+        // otherwise, check if the connection has been accepted correctly
         if (newsockfd < 0)
         {
             std::cout << "error on accept" << std::endl;
@@ -80,6 +88,7 @@ void Server::listenToPort(const std::string& ipAddress, int port)
 
         std::cout << "accepted connection" << std::endl;
 
+        // and add to the clients connected
         clientsConnected++;
 
         // Claude correction code
@@ -89,14 +98,24 @@ void Server::listenToPort(const std::string& ipAddress, int port)
         // set the seed for the random client ID based on the time
         std::srand(std::time({}));
         newClient.clientID = rand();
+        // This avoids client ID collisions based on the `clientsConnected` variable
 
+        // assign the new client's socket file descriptor
         newClient.sockfd = newsockfd;
 
+        // This avoids a lot of faff with array size and referencing existing clients
+        // Although if a client disconnects, reconfiguration may be required
         int index = clientThreads.size();
+        newClient.index = index;
         clientThreads.push_back(std::move(newClient));
 
+        // assign the player identity to the ID
+        if (index == 0) playerOneID = newClient.clientID;
+        else if (index == 1) playerTwoID = newClient.clientID;
+        else;
+
         // Grab a reference to the existing client in the list
-        ClientData& clientRef = clientThreads.back();
+        // ClientData& clientRef = clientThreads.back();
         // This saves us from accidentally deleting it
 
         // Create the thread with the reference to the existing client via index
@@ -123,6 +142,11 @@ void Server::listenToPort(const std::string& ipAddress, int port)
         {
             if (!client->active && client->thread.joinable())
             {
+                // make sure that all the clients that have joined after
+                // have their indexes adjusted
+                for (int i = client->index; i < clientThreads.size(); ++i)
+                    clientThreads[i].index--;
+
                 client->thread.join();
                 client = clientThreads.erase(client);
             }
@@ -138,19 +162,20 @@ int Server::connectClient(int sockfd, ClientData &client)
     {
         close(sockfd);
         clientsConnected--;
+        client.active = false;
     }
 
-    std::cout << clientsConnected << std::endl;
+    // std::cout << clientsConnected << std::endl;
     int n;
     char buffer[256];
-    int clientNumber;
+    // int clientNumber;
     std::string buffer_str;
 
-    std::cout << "Client ID: " << client.clientID << std::endl;
-    std::cout << "sockfd value: " << sockfd << std::endl;
-    std::cout << "sockfd valid check: " << (sockfd >= 0 ? "yes" : "NO!") << std::endl;
-    std::cout << "client.active: " << (client.active ? "yes" : "no") << std::endl;
-    std::cout << "buffer address: " << (void*)buffer << std::endl;
+    // std::cout << "Client ID: " << client.clientID << std::endl;
+    // std::cout << "sockfd value: " << sockfd << std::endl;
+    // std::cout << "sockfd valid check: " << (sockfd >= 0 ? "yes" : "NO!") << std::endl;
+    // std::cout << "client.active: " << (client.active ? "yes" : "no") << std::endl;
+    // std::cout << "buffer address: " << (void*)buffer << std::endl;
 
     // Try to check if socket is actually valid
     int error = 0;
@@ -163,7 +188,8 @@ int Server::connectClient(int sockfd, ClientData &client)
     while (sockfd > 0)
     {
         if (!client.assigned) {
-            std::cout << "Client number is being assigned" << std::endl;
+            if (client.clientID == client.returnedClientID) client.assigned = true;
+            // std::cout << "Client number is being assigned" << std::endl;
             const std::string assignment = std::to_string(client.clientID);
             n = send(sockfd, assignment.c_str(), sizeof(assignment), 0);
             std::cout << assignment << std::endl;
@@ -173,10 +199,12 @@ int Server::connectClient(int sockfd, ClientData &client)
             if (buffer_str == assignment)
             {
                 client.assigned = true;
+                client.returnedClientID = client.clientID;
                 std::cout << "Client number assigned" << std::endl;
             } else
             {
                 std::cout << "Client number was not assigned" << std::endl;
+                break;
             }
 
             if (n <= 0)
@@ -185,11 +213,13 @@ int Server::connectClient(int sockfd, ClientData &client)
                 {
                     std::cout << "Client disconnected" << std::endl;
                     clientsConnected--;
+                    client.active = false;
                 }
                 else
                 {
                     std::cout << "Error reading from socket" << std::endl;
                     clientsConnected--;
+                    client.active = false;
                 }
                 close(sockfd);
             }
@@ -199,6 +229,7 @@ int Server::connectClient(int sockfd, ClientData &client)
             buffer_str = "";
 
             std::cout << "Client ID: " << client.clientID << std::endl;
+            std::cout << "Trying to read from client" << std::endl;
             n = recv(sockfd, buffer, sizeof(buffer), 0);
             // std::cout << "Read from connection once" << std::endl;
 
@@ -210,17 +241,21 @@ int Server::connectClient(int sockfd, ClientData &client)
                 buffer_str = "";
             }
 
+            decodeData(sockfd);
+
             if (n <= 0)
             {
                 if (n == 0)
                 {
                     std::cout << "Client " + std::to_string(client.clientID) + " disconnected" << std::endl;
                     clientsConnected--;
+                    client.active = false;
                 }
                 else
                 {
                     std::cout << "Error reading from socket" << std::endl;
                     clientsConnected--;
+                    client.active = false;
                 }
                 close(sockfd);
                 break;
@@ -310,6 +345,17 @@ bool Server::validatePortNumber(const int& portNumber)
     return (portNumber > 0 && portNumber < 65535);
 }
 
+void Server::decodeData(int ID)
+{
+    if (ID == playerOneID)
+    {
+        std::cout << "Player one inputs: " << clientThreads[ID].latestMessage << std::endl;
+    } else if (ID == playerTwoID)
+    {
+        std::cout << "Player two inputs: " << clientThreads[ID].latestMessage << std::endl;
+    }
+}
+
 // Old code
 // bool ClientData::writeToConnection(std::string message)
 // {
@@ -352,7 +398,7 @@ bool ClientData::writeIntToConnection(const int* message) const
 bool ClientData::writeStringToConnection(const std::string message) const
 {
     const char* message_char = message.c_str();
-    const size_t messageLen = sizeof(message);
+    constexpr size_t messageLen = sizeof(message);
     size_t totalSent = 0;
 
     while (totalSent < messageLen)
