@@ -227,10 +227,10 @@ int* Game::encodeData()
 
 void Game::decodeData(int* data)
 {
-    for (int i = 0; i < 17; i++)
-    {
-        std::cout << std::to_string(data[i]) + ", ";
-    } std::cout << std::endl;
+    // for (int i = 0; i < 17; i++)
+    // {
+    //     std::cout << std::to_string(data[i]) + ", ";
+    // } std::cout << std::endl;
 
     p1Paddle.set_x_pos(data[0]);
     p1Paddle.set_y_pos(data[1]);

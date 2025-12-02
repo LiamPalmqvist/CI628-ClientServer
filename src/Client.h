@@ -6,9 +6,10 @@
 #include <thread>
 #include <unistd.h>
 #include <SDL2/SDL.h>
+#include <chrono>
 
 #include "Game.h"
-#include "Window.h"
+// #include "Window.h"
 
 class Client {
     // Private variables
@@ -19,7 +20,16 @@ class Client {
     int clientID;
 
     Game game;
-    Window window;
+
+    // SDL INFORMATION
+    SDL_Window* window;
+    SDL_Renderer* renderer;
+    bool windowIsOpen = true;
+    bool keys[2] = {false, false};
+
+    // SDL FUNCTIONS
+    void init_SDL(const int sockfd);
+    void getInputs(SDL_Event &event);
 
     // Private functions
     static bool validateIpAddress(const std::string &ipAddress);

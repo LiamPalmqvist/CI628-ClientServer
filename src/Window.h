@@ -19,7 +19,7 @@ public:
     //              W      S
     bool keys[2] = {false, false};
     bool windowIsOpen = true;
-    void init();
+    Window();
     void instantiateGameObjects();
     void renderGameObjects();
 };

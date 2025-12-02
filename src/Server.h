@@ -6,6 +6,7 @@
 #include <thread>
 #include <vector>
 #include <mutex>
+#include <chrono>
 //#include <uuid/uuid.h>
 
 #include "Game.h"
@@ -14,7 +15,7 @@ class ClientData {
 public:
 
     // Public variables
-    int clientID;
+    int clientID = 0;
     int sockfd;
     int index;
     std::thread thread;
@@ -39,8 +40,8 @@ class Server {
     std::mutex clientsMutex;
     // End of Claude correction code
 
-    int playerOneID;
-    int playerTwoID;
+    int playerOneID = 0;
+    int playerTwoID = 0;
     bool p1Keys[2] = {false, false};
     bool p2Keys[2] = {false, false};
 
@@ -57,6 +58,9 @@ public:
     static bool validatePortNumber(const int &portNumber);
     void broadcastStringMessage(const std::string message, long excludeClientId = -1);
     void broadcastIntMessage(const int* message, long excludeClientId = -1);
-    void decodeData(int sockfd);
+    void decodeData(ClientData& client);
+    void assignClientID(ClientData& client);
+    void incrementClientsConnected();
+    void decrementClientsConnected();
 };
 

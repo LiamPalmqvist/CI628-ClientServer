@@ -6,7 +6,7 @@
 
 #include "Game.h"
 
-void Window::init() {
+Window::Window() {
     // Check if we can create an SDL Window
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
         std::cout << "SDL_Init Error: " << SDL_GetError() << std::endl;
@@ -53,13 +53,13 @@ void Window::init() {
     // Finally, we get to the main loop
     SDL_Event event;
 
-    Game game;
+    //Game game;
 
     while (windowIsOpen)
     {
         // Process events
         while (SDL_PollEvent(&event)) {
-            //getInputs(event);
+            getInputs(event);
             if (event.type == SDL_QUIT) {
                 windowIsOpen = false;
             }
@@ -87,11 +87,12 @@ void Window::getInputs(SDL_Event &event)
         keys[0] = event.type == SDL_KEYDOWN;
         break;
     case SDLK_s:
-        keys[2] = event.type == SDL_KEYDOWN;
+        keys[1] = event.type == SDL_KEYDOWN;
         break;
     default:
         break;
     }
+    std::cout << "keys: " << keys[0] << " " << keys[1] << std::endl;
 }
 
 void Window::instantiateGameObjects()

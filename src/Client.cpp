@@ -70,9 +70,9 @@ Client::Client(const std::string& ipAddress, const int port)
     listeningThread = std::thread(&Client::listenToServer, this, sockfd);
     sendingThread = std::thread(&Client::sendToServer, this, sockfd);
 
-    window.init();
+    init_SDL(sockfd);
 
-    if (!window.windowIsOpen)
+    if (!windowIsOpen)
     {
         listeningThread.detach();
         sendingThread.detach();
@@ -86,27 +86,53 @@ void Client::listenToServer(const int sockfd)
     int* buffer_int;
     while (connected)
     {
+        std::this_thread::sleep_for(std::chrono::seconds(1/60));
         if (!assigned)
         {
+            // listen for ID assignment
             std::cout << "Trying to assign to Client ID" << std::endl;
             buffer_str = tryRecvStringFromServer(sockfd);
             std::cout << "Client ID: " << buffer_str << std::endl;
             if (buffer_str.length() != 0)
             {
-                // std::cout << buffer_str << std::endl;
-                clientID = std::stoi(buffer_str);
-                assigned = true;
+                std::cout << buffer_str.length() << std::endl;
+                try
+                {
+                    clientID = std::stoi(buffer_str);
+                }
+                catch (std::exception& e)
+                {
+                    std::cout << e.what() << std::endl;
+                    std::cout << "Trying again" << std::endl;
+                    break;
+                }
             }
+
+            //assigned = true;
+
+            // Send ID assignment back
+            std::cout << "Didn't break" << std::endl;
             tryWriteToServer(sockfd, buffer_str);
             std::cout << "Sending Client ID back to server" << std::endl;
 
             bzero(buffer_str.data(), buffer_str.length());
-        } else
+
+            // Listen for ACK
+            buffer_str = tryRecvStringFromServer(sockfd);
+            if (buffer_str.contains("ACK"))
+            {
+                assigned = true;
+            }
+
+            bzero(buffer_str.data(), buffer_str.length());
+
+        }
+        else
         {
-            std::cout << "Trying to recieve int array from server" << std::endl;
+            //std::cout << "Trying to recieve int array from server" << std::endl;
             buffer_int = tryRecvIntFromServer(sockfd);
             game.decodeData(buffer_int);
-            game.printData();
+            //game.printData();
             bzero(buffer_int, sizeof(int)*17);
             // We can do this because we know the size of the data coming over
             // exactly
@@ -136,9 +162,10 @@ std::string Client::tryRecvStringFromServer(const int sockfd)
     return buffer;
 }
 
+// Disable with comment
 int* Client::tryRecvIntFromServer(const int sockfd)
 {
-    std::cout << "Trying to read from socket" << std::endl;
+    //std::cout << "Trying to read from socket" << std::endl;
 
     static int buffer[17];
     if (const int n = recv(sockfd, buffer, sizeof(buffer), 0); n <= 0)
@@ -171,14 +198,17 @@ int* Client::tryRecvIntFromServer(const int sockfd)
 
 void Client::sendToServer(int sockfd)
 {
-    std::string message;
     //char buffer[256];
-    message = std::to_string(window.keys[0]) + std::to_string(window.keys[1]);
-    //std::cout << message << std::endl;
+    std::string message;
     while (connected)
     {
         if (assigned)
+        {
+            message = keys[0] == true ? "1" : "0";
+            message += (keys[1] == true ? "1" : "0");
+            //std::cout << "Message to server: " << message << std::endl;
             tryWriteToServer(sockfd, message);
+        }
         //if (game.playing)
         //{
         //}
@@ -200,7 +230,7 @@ void Client::tryWriteToServer(const int sockfd, const std::string& message)
         close(sockfd);
         connected = false;
     }
-    std::cout << "Wrote " << message << " to server" << std::endl;
+    //std::cout << "Wrote " << message << " to server" << std::endl;
 }
 
 bool Client::validateIpAddress(const std::string& ipAddress)
@@ -213,4 +243,102 @@ bool Client::validateIpAddress(const std::string& ipAddress)
 bool Client::validatePortNumber(const int& portNumber)
 {
     return (portNumber > 0 && portNumber < 65535);
+}
+
+void Client::init_SDL(const int sockfd) {
+    // Check if we can create an SDL Window
+    if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+        std::cout << "SDL_Init Error: " << SDL_GetError() << std::endl;
+        return;
+    }
+
+    // Start creating a window for SDL
+    window = SDL_CreateWindow(
+        "Game",
+        SDL_WINDOWPOS_CENTERED,
+        SDL_WINDOWPOS_CENTERED,
+        800,
+        600,
+        SDL_WINDOW_SHOWN
+    );
+
+    // if the window creation failed, print the error and exit
+    if (!window) {
+        std::cout << "SDL_CreateWindow Error: " << SDL_GetError() << std::endl;
+        SDL_Quit();
+        windowIsOpen = false;
+        return;
+    }
+
+    renderer = SDL_CreateRenderer(
+        window,
+        -1,
+        SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC
+    );
+
+    // This function creates a renderer for the window, using hardware acceleration
+    // and VSync
+    // -1 indicates that it will use the first available rendering driver
+
+    // If the renderer creation fails, print the error and exit
+    if (!renderer) {
+        std::cout << "SDL_CreateRenderer Error: " << SDL_GetError();
+        SDL_DestroyWindow(window);
+        SDL_Quit();
+        windowIsOpen = false;
+        return;
+    }
+
+    // Move the threading here
+    // listeningThread = std::thread(&Client::listenToServer, this, sockfd);
+    // sendingThread = std::thread(&Client::sendToServer, this, sockfd);
+
+
+    // Finally, we get to the main loop
+    SDL_Event event;
+
+    // Game game;
+
+    // std::cout << "SDL_Event " << event.type << std::endl;
+
+    while (windowIsOpen)
+    {
+        //std::cout << "Window stuff happening" << std::endl;
+        // Process events
+        while (SDL_PollEvent(&event)) {
+            getInputs(event);
+            if (event.type == SDL_QUIT) {
+                windowIsOpen = false;
+            }
+        }
+
+        // Updating positions of objects goes here
+
+        SDL_RenderClear(renderer);
+        // Render call goes here
+        SDL_RenderPresent(renderer);
+    }
+
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    SDL_Quit();
+
+    sendingThread.detach();
+    listeningThread.detach();
+}
+
+void Client::getInputs(SDL_Event &event)
+{
+    switch (event.key.keysym.sym)
+    {
+    case SDLK_w:
+        keys[0] = event.type == SDL_KEYDOWN;
+        break;
+    case SDLK_s:
+        keys[1] = event.type == SDL_KEYDOWN;
+        break;
+    default:
+        break;
+    }
+    //std::cout << "keys: " << keys[0] << " " << keys[1] << std::endl;
 }
