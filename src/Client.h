@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <SDL2/SDL.h>
 #include <chrono>
+#include <vector>
 
 #include "Game.h"
 // #include "Window.h"
@@ -27,9 +28,14 @@ class Client {
     bool windowIsOpen = true;
     bool keys[2] = {false, false};
 
+    std::vector<SDL_Rect> playerPaddles;
+
     // SDL FUNCTIONS
     void init_SDL(const int sockfd);
     void getInputs(SDL_Event &event);
+    void instantiateGameObjects();
+    void renderGameObjects() const;
+    void updateGameObjects();
 
     // Private functions
     static bool validateIpAddress(const std::string &ipAddress);

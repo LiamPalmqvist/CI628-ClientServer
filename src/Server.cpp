@@ -10,11 +10,13 @@ Server::Server(const std::string& ipAddress, int port)
     // consider using a condition_variable. For now, sleep briefly.
     while (threadListening)
     {
+        game.update();
         if (clientsConnected == 2)
         {
+            std::cout << "Both players connected. Starting game..." << std::endl;
             //game.playing = true;
         }
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::this_thread::sleep_for(std::chrono::milliseconds(16));
     }
 }
 
@@ -30,10 +32,8 @@ void Server::listenToPort(const std::string& ipAddress, int port)
         threadListening = false;
         return;
     }
-    else
-    {
-        str_port = std::to_string(port);
-    }
+
+    str_port = std::to_string(port);
 
     // setup variables for client connection
     int sockfd,
@@ -148,6 +148,8 @@ void Server::listenToPort(const std::string& ipAddress, int port)
             clientRef.active = false;
         });
 
+        clientThreads[index].thread.detach();
+
         // Clean up finished threads & inactive clients
         for (auto it = clientThreads.begin(); it != clientThreads.end();)
         {
@@ -231,6 +233,7 @@ int Server::connectClient(int sockfd, ClientData& client)
 
             // Build string from the number of bytes actually read
             buffer_str.assign(buffer, static_cast<size_t>(n));
+            std::cout << "Client: " << buffer_str << std::endl;
             if (!buffer_str.empty())
             {
                 client.latestMessage = buffer_str;
@@ -247,7 +250,7 @@ int Server::connectClient(int sockfd, ClientData& client)
                 if (i) str += ", ";
                 str += std::to_string(buffer_int[i]);
             }
-            // std::cout << "sending " << str << std::endl;
+            std::cout << "sending " << str << std::endl;
             broadcastIntMessage(buffer_int);
         }
     }
@@ -279,13 +282,19 @@ void Server::assignClientID(ClientData& client)
         else
         {
             std::cout << "10. Error writing to socket: " << strerror(errno) << std::endl;
-            decrementClientsConnected();
-            client.active = false;
+            client.timeoutTries++;
+            if (client.timeoutTries >= 10)
+            {
+                std::cout << "Client timed out, too many retries" << std::endl;
+                decrementClientsConnected();
+                client.active = false;
+                close(client.sockfd);
+            }
         }
-        close(client.sockfd);
         return;
     }
-    else std::cout << "10. No problem" << std::endl;
+
+    std::cout << "10. No problem" << std::endl;
 
     // Recieve it back
     std::cout << "11. Assigned ID: " << buffer_str << std::endl;
@@ -423,18 +432,22 @@ void Server::decodeData(ClientData& client)
     {
         if (clientThreads[client.index].latestMessage.size() >= 2)
         {
-            p1Keys[0] = (clientThreads[client.index].latestMessage[0] == '1');
-            p1Keys[1] = (clientThreads[client.index].latestMessage[1] == '1');
+            game.playerKeys[0] = (clientThreads[client.index].latestMessage[0] == '1');
+            game.playerKeys[1] = (clientThreads[client.index].latestMessage[1] == '1');
         }
     }
     else if (client.clientID == playerTwoID)
     {
         if (clientThreads[client.index].latestMessage.size() >= 2)
         {
-            p2Keys[0] = (clientThreads[client.index].latestMessage[0] == '1');
-            p2Keys[1] = (clientThreads[client.index].latestMessage[1] == '1');
+            game.playerKeys[2] = (clientThreads[client.index].latestMessage[0] == '1');
+            game.playerKeys[3] = (clientThreads[client.index].latestMessage[1] == '1');
         }
     }
+
+    // std::cout << client.latestMessage << std::endl;
+    // std::cout << p1Keys[0] << " " << p1Keys[1] << std::endl;
+    // std::cout << p2Keys[0] << " " << p2Keys[1] << std::endl;
 }
 
 // Claude code
@@ -444,6 +457,11 @@ bool ClientData::writeIntToConnection(const int* message) const
     const size_t totalBytes = 17 * sizeof(int);
     const char* data = reinterpret_cast<const char*>(message);
     size_t totalSent = 0;
+
+    for (int i = 0; i < 17; i++)
+    {
+        std::cout << data[i] << std::endl;
+    }
 
     while (totalSent < totalBytes)
     {

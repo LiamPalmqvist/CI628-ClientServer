@@ -24,6 +24,8 @@ public:
     int returnedClientID;
     std::string latestMessage = "";
     std::string previousMessage = "";
+    int timeoutTries = 0;
+
 
     // Public functions
     bool writeStringToConnection(const std::string message) const;

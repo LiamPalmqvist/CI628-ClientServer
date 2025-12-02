@@ -71,18 +71,19 @@ public:
 
 class Game
 {
-    // Private variables
-    Paddle p1Paddle;
-    Paddle p2Paddle;
-    Ball ball;
-    int p1Points = 0;
-    int p2Points = 0;
-
     // Private methods
     void checkCollisions();
 
 public:
     // Public variables
+
+    // Game objects
+    Paddle playerPaddles[2] = {Paddle(0), Paddle(1)};
+    Ball ball;
+    bool playerKeys[4] = {false, false, false, false};
+    int p1Points = 0;
+    int p2Points = 0;
+
     bool playing;
 
     // Public initialiser
@@ -90,9 +91,9 @@ public:
 
     // Public functions and methods
     int* encodeData();
-    void decodeData(int * data);
+    void decodeData(int* data);
     void printData();
-    void update(const bool p1keys[6], const bool p2keys[6]);
+    void update();
 };
 
 

@@ -129,10 +129,10 @@ void Client::listenToServer(const int sockfd)
         }
         else
         {
-            //std::cout << "Trying to recieve int array from server" << std::endl;
+            std::cout << "Trying to recieve int array from server" << std::endl;
             buffer_int = tryRecvIntFromServer(sockfd);
             game.decodeData(buffer_int);
-            //game.printData();
+            game.printData();
             bzero(buffer_int, sizeof(int)*17);
             // We can do this because we know the size of the data coming over
             // exactly
@@ -208,6 +208,7 @@ void Client::sendToServer(int sockfd)
             message += (keys[1] == true ? "1" : "0");
             //std::cout << "Message to server: " << message << std::endl;
             tryWriteToServer(sockfd, message);
+            std::this_thread::sleep_for(std::chrono::milliseconds(16));
         }
         //if (game.playing)
         //{
@@ -299,6 +300,8 @@ void Client::init_SDL(const int sockfd) {
 
     // Game game;
 
+    instantiateGameObjects();
+
     // std::cout << "SDL_Event " << event.type << std::endl;
 
     while (windowIsOpen)
@@ -314,8 +317,12 @@ void Client::init_SDL(const int sockfd) {
 
         // Updating positions of objects goes here
 
+        updateGameObjects();
+
         SDL_RenderClear(renderer);
         // Render call goes here
+        renderGameObjects();
+
         SDL_RenderPresent(renderer);
     }
 
@@ -341,4 +348,52 @@ void Client::getInputs(SDL_Event &event)
         break;
     }
     //std::cout << "keys: " << keys[0] << " " << keys[1] << std::endl;
+}
+
+void Client::instantiateGameObjects()
+{
+    for (auto paddle : game.playerPaddles)
+    {
+        SDL_Rect paddleRect = {paddle.get_x_pos(), paddle.get_y_pos(), paddle.get_xSize(), paddle.get_ySize()};
+        playerPaddles.push_back(paddleRect);
+    }
+
+}
+
+void Client::renderGameObjects() const
+{
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+
+    for (auto paddle : playerPaddles)
+    {
+        SDL_RenderFillRect(renderer, &paddle);
+    }
+
+    const int centerX = game.ball.get_x_pos();
+    const int centerY = game.ball.get_y_pos();
+    const int radius = game.ball.get_radius();
+
+    for (int i = 0; i < 180; i++)
+    {
+        float startx = centerX - cos(i) * radius;
+        float starty = centerY - sin(i) * radius;
+        float endx = centerX + cos(i) * radius;
+        float endy = centerY + sin(i) * radius;
+
+        SDL_RenderDrawLine(renderer, startx, starty, endx, endy);
+    }
+
+    //SDL_RenderDrawLine(renderer, 0, 300, 800, 300);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+}
+
+void Client::updateGameObjects()
+{
+    for (int i = 0; i < playerPaddles.size(); i++)
+    {
+        playerPaddles[i].x = game.playerPaddles[i].get_x_pos();
+        playerPaddles[i].y = game.playerPaddles[i].get_y_pos();
+        playerPaddles[i].w = game.playerPaddles[i].get_xSize();
+        playerPaddles[i].h = game.playerPaddles[i].get_ySize();
+    }
 }
