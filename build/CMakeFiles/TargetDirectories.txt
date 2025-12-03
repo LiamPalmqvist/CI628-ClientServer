@@ -1,3 +1,0 @@
-/Users/liam/Programming/C++/CleanServerClient/build/CMakeFiles/Client.dir
-/Users/liam/Programming/C++/CleanServerClient/build/CMakeFiles/edit_cache.dir
-/Users/liam/Programming/C++/CleanServerClient/build/CMakeFiles/rebuild_cache.dir
