@@ -14,12 +14,7 @@ include_directories(
 
 file(GLOB_RECURSE SOURCE_FILES "src/*.h" "src/*.cpp")
 
-add_executable(${PROJECT_NAME} ${SOURCE_FILES}
-        src/Game.cpp
-        src/Game.h
-        src/Window.cpp
-        src/Window.h)
-
+add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
 target_link_libraries(${PROJECT_NAME}
         ${SDL2_LIBRARIES}

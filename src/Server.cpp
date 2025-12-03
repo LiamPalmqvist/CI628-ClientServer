@@ -1,61 +1,89 @@
+//
+// Created by Liam on 03/12/2025.
+//
+
 #include "Server.h"
 
-Server::Server(const std::string& ipAddress, int port)
-{
-    std::thread listenThread(&Server::listenToPort, this, ipAddress, port);
-    // detached from main thread - GitHub Copilot
-    listenThread.detach();
+// Server2 class implementation
 
-    // Avoid busy-waiting here; if you need to wait for two clients,
-    // consider using a condition_variable. For now, sleep briefly.
+Server::Server(const std::string& ipAddress, const int port)
+{
+    // This constructor opens a port to listen for incoming connections
+    int sockfd = openPort(ipAddress, port);
+
+    if (sockfd > 0) threadListening = true;
+
+    // It the starts listening for incoming connections
+    listeningThread = std::thread([this, sockfd]()
+    {
+        listenForClients(sockfd);
+    });
+
+    listeningThread.detach();
+
     while (threadListening)
     {
-        game.update();
-        if (clientsConnected == 2)
+        try
         {
-            std::cout << "Both players connected. Starting game..." << std::endl;
-            //game.playing = true;
+            for (int i = 0; i < clients.size(); i++)
+            {
+                game.playerKeys[2*i] = clients[i]->keys[0];
+                game.playerKeys[2*i + 1] = clients[i]->keys[1];
+            }
+            // std::cout << "Updating keys: "
+            //           << game.playerKeys[0] << " " << game.playerKeys[1] << " "
+            //           << game.playerKeys[2] << " " << game.playerKeys[3] << std::endl;
+        }
+        catch (std::exception& e)
+        {
+            std::cerr << "Too many clients connected: " << e.what() << std::endl;
+        }
+
+        // TODO: UNCOMMENT THIS WHEN READY TO TEST WITH 2 PLAYERS
+        if (clients.size() >= 2)
+        {
+            game.update();
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(16));
     }
 }
 
-void Server::listenToPort(const std::string& ipAddress, int port)
+int Server::openPort(const std::string& ipAddress, const int port)
 {
     std::cout << "Hello" << std::endl;
-    std::string str_port;
 
     // First, validate the IP and the Port Number
     if (!(validateIpAddress(ipAddress) && validatePortNumber(port)))
     {
-        std::cout << "Error: IP Address or Port format incorrect" << std::endl;
-        threadListening = false;
-        return;
+        throw std::invalid_argument("Invalid IP address or port number");
     }
 
-    str_port = std::to_string(port);
+    const std::string str_port = std::to_string(port);
 
     // setup variables for client connection
-    int sockfd,
-        newsockfd,
-        portno,
-        clilen;
+    int portno;
 
-    struct sockaddr_in serv_addr,
-                       cli_addr;
+    sockaddr_in serv_addr{};
 
     // Create a socket file descriptor for which to accept incoming connections
-    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    const int sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0)
     {
-        std::cout << "Error opening socket" << std::endl;
-        threadListening = false;
-        return;
+        throw std::runtime_error("Error opening socket");
     }
 
     // clear the server's address to assign appropriate information
-    bzero((char*)&serv_addr, sizeof(serv_addr));
-    portno = std::atoi(str_port.data());
+    bzero(&serv_addr, sizeof(serv_addr));
+
+    try
+    {
+        portno = std::stoi(str_port);
+    }
+    catch (std::exception& e)
+    {
+        throw std::runtime_error("Error when trying to convert port number: " + std::string(e.what()));
+    }
+
 
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_port = htons(portno);
@@ -63,454 +91,254 @@ void Server::listenToPort(const std::string& ipAddress, int port)
 
     // Bind the server information to the socket file descriptor
     // Cleaned up by GitHub Copilot
-    if (bind(sockfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) < 0)
+    if (bind(sockfd, reinterpret_cast<sockaddr*>(&serv_addr), sizeof(serv_addr)) < 0)
     {
-        std::cout << "Error: Could not bind" << std::endl;
-        threadListening = false;
         close(sockfd); // close the socket
-        return; // and return
+        throw std::runtime_error("Error: Could not bind"); // and throw error
     }
 
     // Start listening for incoming connections
     if (listen(sockfd, 5) < 0) // check for errors
     {
-        std::cout << "Error: listen failed" << std::endl;
-        threadListening = false;
         close(sockfd); // close the socket
-        return; // and return
+        throw std::runtime_error("Error: Listen failed"); // and throw error
     }
 
-    clilen = sizeof(cli_addr);
+    // if everything went well, we now have a port open to listen for connections on
+    return sockfd;
+}
 
-    // While listening for incoming connections
+void Server::listenForClients(const int sockfd)
+{
     while (threadListening)
     {
-        // if a client is requesting to connect, accept the connection
-        newsockfd = accept(sockfd, (struct sockaddr*)&cli_addr, (socklen_t*)&clilen);
-        // if the amount of clients connected already exceeds the limit
+        sockaddr_in cli_addr{};
+        socklen_t clilen = sizeof(cli_addr);
+
+        // Accept incoming connection
+        const int newsockfd = accept(sockfd, reinterpret_cast<struct sockaddr*>(&cli_addr), &clilen);
         if (newsockfd < 0)
         {
-            std::cout << "error on accept" << std::endl;
-            break;
+            std::cerr << "Error on accept" << std::endl;
+            continue; // CONTINUE BREAKS THIS LOOP ONLY AND STARTS IT AGAIN
         }
+        std::cout << "New client ID: " << newsockfd << std::endl;
 
-        // if break is used then it will not work properly
-        if (clientsConnected >= 3)
+        // if we already have 2 clients connected, reject the new connection
+        if (clients.size() == 2)
         {
-            // close the connection and continue
             close(newsockfd);
-            continue; // change to continue
         }
 
-        std::cout << "1. accepted connection" << std::endl;
-
-        // and add to the clients connected
-        incrementClientsConnected();
-
-        // Create the client and add it to the list
-        ClientData newClient;
-
-        // assign the new client's socket file descriptor
-        newClient.sockfd = newsockfd;
-
-        int index = static_cast<int>(clientThreads.size());
-        newClient.index = index;
-        newClient.clientID = newClient.index + 1;
-        newClient.active = true;
-        newClient.assigned = false;
-        std::cout << "2. Client ID: " << newClient.clientID << std::endl;
-
-        clientThreads.push_back(std::move(newClient));
-
-        // assign the player identity to the ID
-        if (index == 0)
         {
-            playerOneID = clientThreads[index].clientID;
+            std::lock_guard lock(clientsMutex);
+            // lock the clients mutex to protect the clients list while we add a new client
+
+            int clientID = static_cast<int>(clients.size()) + 1;
+            // We need to make a reference to add to the clients list
+            auto newClient = std::make_shared<ServerClientInstance>(newsockfd, clientID, &game, &gameMutex);
+            // Lock the clients mutex to protect the clients list
+            clients.push_back(newClient);
+            // This should now have added the client to the list safely
         }
-        else if (index == 1)
-        {
-            playerTwoID = clientThreads[index].clientID;
-        }
-        else
-        {
-            // extra safety: if >2, close
-            close(clientThreads[index].sockfd);
-            clientThreads[index].active = false;
-        }
-
-        // Create the thread with the reference to the client via index
-        clientThreads[index].thread = std::thread([this, index]()
-        {
-            // capture index by value
-            ClientData& clientRef = clientThreads[index];
-            connectClient(clientRef.sockfd, clientRef);
-            // mark inactive and cleanup
-            clientRef.active = false;
-        });
-
-        clientThreads[index].thread.detach();
-
-        // Clean up finished threads & inactive clients
-        for (auto it = clientThreads.begin(); it != clientThreads.end();)
-        {
-            if (!it->active && it->thread.joinable())
-            {
-                it->thread.join();
-                it = clientThreads.erase(it);
-                // reassign indices
-                for (size_t i = 0; i < clientThreads.size(); ++i)
-                    clientThreads[i].index = static_cast<int>(i);
-            }
-            else
-            {
-                ++it;
-            }
-        }
+        disconnectInactiveClients();
     }
-
     close(sockfd);
-}
-
-int Server::connectClient(int sockfd, ClientData& client)
-{
-    int n;
-    char buffer[256];
-    std::string buffer_str;
-
-    std::cout << "3. Client ID: " << client.clientID << std::endl;
-    std::cout << "4. sockfd value: " << sockfd << std::endl;
-    std::cout << "5. sockfd valid check: " << (sockfd >= 0 ? "yes" : "NO!") << std::endl;
-    std::cout << "6. client.active: " << (client.active ? "yes" : "no") << std::endl;
-    std::cout << "7. buffer address: " << (void*)buffer << std::endl;
-
-    // Try to check if socket is actually valid
-    int error = 0;
-    socklen_t len = sizeof(error);
-    int retval = getsockopt(sockfd, SOL_SOCKET, SO_ERROR, &error, &len);
-
-    int* buffer_int;
-
-    while (sockfd > 0 && client.active)
-    {
-        // sleep for ~60Hz
-        std::this_thread::sleep_for(std::chrono::milliseconds(16));
-
-        if (!client.assigned)
-        {
-            // Try assign client ID
-            assignClientID(client);
-            // if still not assigned, go around or break
-            if (!client.assigned) {
-                // If assignment failed and client was marked inactive, break
-                if (!client.active) break;
-                continue;
-            }
-        }
-        else
-        {
-            bzero(buffer, sizeof(buffer));
-            buffer_str.clear();
-
-            n = recv(sockfd, buffer, sizeof(buffer), 0);
-
-            if (n <= 0)
-            {
-                if (n == 0)
-                {
-                    std::cout << "8. Client " + std::to_string(client.clientID) + " disconnected" << std::endl;
-                    decrementClientsConnected();
-                    client.active = false;
-                }
-                else
-                {
-                    std::cout << "8. Error reading from socket: " << strerror(errno) << std::endl;
-                    decrementClientsConnected();
-                    client.active = false;
-                }
-                close(sockfd);
-                break;
-            }
-
-            // Build string from the number of bytes actually read
-            buffer_str.assign(buffer, static_cast<size_t>(n));
-            std::cout << "Client: " << buffer_str << std::endl;
-            if (!buffer_str.empty())
-            {
-                client.latestMessage = buffer_str;
-            }
-
-            decodeData(client);
-
-            buffer_int = game.encodeData();
-
-            // For logging/verification build a small readable string
-            std::string str = "";
-            for (int i = 0; i < 17; ++i)
-            {
-                if (i) str += ", ";
-                str += std::to_string(buffer_int[i]);
-            }
-            std::cout << "sending " << str << std::endl;
-            broadcastIntMessage(buffer_int);
-        }
-    }
-
-    return 1;
-}
-
-void Server::assignClientID(ClientData& client)
-{
-    int n;
-    char buffer[256];
-    bzero(buffer, sizeof(buffer));
-
-    std::string buffer_str = std::to_string(clientsConnected);
-    std::cout << "8. Clients connected: " << std::to_string(clientsConnected) << std::endl;
-    std::cout << "9. Buffer string: " << buffer_str << std::endl;
-    if (client.clientID == 0) client.clientID = client.index + 1;
-
-    // Send ID to client
-    n = send(client.sockfd, buffer_str.c_str(), buffer_str.length(), 0);
-    if (n <= 0)
-    {
-        if (n == 0)
-        {
-            std::cout << "10. Client disconnected during send" << std::endl;
-            decrementClientsConnected();
-            client.active = false;
-        }
-        else
-        {
-            std::cout << "10. Error writing to socket: " << strerror(errno) << std::endl;
-            client.timeoutTries++;
-            if (client.timeoutTries >= 10)
-            {
-                std::cout << "Client timed out, too many retries" << std::endl;
-                decrementClientsConnected();
-                client.active = false;
-                close(client.sockfd);
-            }
-        }
-        return;
-    }
-
-    std::cout << "10. No problem" << std::endl;
-
-    // Recieve it back
-    std::cout << "11. Assigned ID: " << buffer_str << std::endl;
-    n = recv(client.sockfd, buffer, sizeof(buffer), 0);
-
-    if (n <= 0)
-    {
-        if (n == 0)
-        {
-            std::cout << "13. Client disconnected" << std::endl;
-            decrementClientsConnected();
-            client.active = false;
-        }
-        else
-        {
-            std::cout << "13. Error reading from socket: " << strerror(errno) << std::endl;
-            decrementClientsConnected();
-            client.active = false;
-        }
-        close(client.sockfd);
-        return;
-    }
-    else std::cout << "13. No problem" << std::endl;
-
-    std::string received(buffer, static_cast<size_t>(n));
-    std::cout << "12. Buffer: " << received << std::endl;
-
-    int buffer_int = 0;
-    try
-    {
-        buffer_int = std::stoi(received);
-    }
-    catch (const std::exception& e)
-    {
-        std::cout << "14. stoi failed: " << e.what() << ". Received data: '" << received << "'" << std::endl;
-        // consider closing connection or retrying protocol
-        close(client.sockfd);
-        client.active = false;
-        decrementClientsConnected();
-        return;
-    }
-
-    std::cout << "14. " << received << std::endl;
-    if (buffer_int == client.clientID)
-    {
-        client.returnedClientID = client.clientID;
-        std::cout << "15. Client number assigned" << std::endl;
-    }
-    else
-    {
-        std::cout << "15. Client number was not assigned (client returned " << buffer_int << ")" << std::endl;
-        return;
-    }
-
-    // Send out acknowledgement
-    buffer_str = "ACK";
-    n = send(client.sockfd, buffer_str.c_str(), buffer_str.length(), 0);
-
-    if (n <= 0)
-    {
-        if (n == 0)
-        {
-            std::cout << "16. Client disconnected" << std::endl;
-            decrementClientsConnected();
-            client.active = false;
-        }
-        else
-        {
-            std::cout << "16. Error writing to socket: " << strerror(errno) << std::endl;
-            decrementClientsConnected();
-            client.active = false;
-        }
-        close(client.sockfd);
-        return;
-    }
-
-    client.assigned = true;
-    std::cout << "\n\n" << std::endl;
-}
-
-// Claude code
-void Server::broadcastStringMessage(const std::string message, long excludeClientId)
-{
-    std::lock_guard lock(clientsMutex);
-
-    for (auto& client : clientThreads)
-    {
-        if (client.active && client.clientID != excludeClientId)
-        {
-            if (client.writeStringToConnection(message))
-                break;
-
-            decrementClientsConnected();
-            client.active = false;
-            close(client.sockfd);
-            return;
-        }
-    }
-}
-
-void Server::broadcastIntMessage(const int* message, long excludeClientId)
-{
-    std::lock_guard lock(clientsMutex);
-
-    for (auto& client : clientThreads)
-    {
-        if (client.active && client.clientID != excludeClientId)
-        {
-            if (!client.writeIntToConnection(message))
-            {
-                decrementClientsConnected();
-                client.active = false;
-                close(client.sockfd);
-                return;
-            }
-        }
-    }
 }
 
 bool Server::validateIpAddress(const std::string& ipAddress)
 {
-    struct sockaddr_in sa;
-    int result = inet_pton(AF_INET, ipAddress.c_str(), &(sa.sin_addr));
+    sockaddr_in sa;
+    const int result = inet_pton(AF_INET, ipAddress.c_str(), &(sa.sin_addr));
     return result != 0;
 }
 
 bool Server::validatePortNumber(const int& portNumber)
 {
-    return (portNumber > 0 && portNumber < 65535);
+    return portNumber > 0 && portNumber < 65535;
 }
 
-void Server::decodeData(ClientData& client)
-{
-    if (client.clientID == playerOneID)
-    {
-        if (clientThreads[client.index].latestMessage.size() >= 2)
-        {
-            game.playerKeys[0] = (clientThreads[client.index].latestMessage[0] == '1');
-            game.playerKeys[1] = (clientThreads[client.index].latestMessage[1] == '1');
-        }
-    }
-    else if (client.clientID == playerTwoID)
-    {
-        if (clientThreads[client.index].latestMessage.size() >= 2)
-        {
-            game.playerKeys[2] = (clientThreads[client.index].latestMessage[0] == '1');
-            game.playerKeys[3] = (clientThreads[client.index].latestMessage[1] == '1');
-        }
-    }
+// Client class implementation
 
-    // std::cout << client.latestMessage << std::endl;
-    // std::cout << p1Keys[0] << " " << p1Keys[1] << std::endl;
-    // std::cout << p2Keys[0] << " " << p2Keys[1] << std::endl;
+ServerClientInstance::ServerClientInstance(int sockfd, int clientID, Game* gameptr, std::mutex* gameMutexPtr)
+{
+    _clientID = clientID;
+    _sockfd = sockfd;
+    game = gameptr;
+    gameMutex = gameMutexPtr;
+    initialiseThreads();
 }
 
-// Claude code
-bool ClientData::writeIntToConnection(const int* message) const
+void ServerClientInstance::initialiseThreads()
 {
-    // Assuming we always send 17 ints (adjust if different)
-    const size_t totalBytes = 17 * sizeof(int);
-    const char* data = reinterpret_cast<const char*>(message);
-    size_t totalSent = 0;
-
-    for (int i = 0; i < 17; i++)
+    if (!initialiseConnection())
     {
-        std::cout << data[i] << std::endl;
+        std::cerr << "Error initialising connection for client ID " << _clientID << std::endl;
+        connected = false;
+        return;
     }
 
-    while (totalSent < totalBytes)
+    listeningThread = std::thread([this]()
     {
-        ssize_t sent = send(sockfd, data + totalSent, totalBytes - totalSent, MSG_NOSIGNAL);
-        if (sent <= 0)
+       listenToClient();
+    });
+    listeningThread.detach();
+
+    sendingThread = std::thread([this]
+    {
+       sendToClient();
+    });
+    sendingThread.detach();
+}
+
+bool ServerClientInstance::initialiseConnection()
+{
+    bool assigned = false;
+    // try to assign an ID to the client
+    while (!assigned)
+    {
+        if (!trySendStringToClient(std::to_string(_clientID)))
         {
-            if (sent == -1 && errno == EINTR) continue;
-            std::cerr << "writeIntToConnection: send failed: " << strerror(errno) << std::endl;
+            connected = false;
             return false;
         }
-        totalSent += static_cast<size_t>(sent);
+
+        std::string response = tryListenToClient();
+        // std::cout << "Got response from client " << _clientID << ": " << response << std::endl;
+        if (response == "ERROR")
+        {
+            connected = false;
+            return false;
+        }
+        if (response.contains("OK"))
+        {
+            assigned = true;
+        }
+
+        if (!trySendStringToClient("ACK"))
+        {
+            connected = false;
+            return false;
+        }
     }
 
     return true;
 }
 
-bool ClientData::writeStringToConnection(const std::string message) const
+void ServerClientInstance::listenToClient()
 {
-    const char* message_char = message.c_str();
-    const size_t messageLen = message.size();
-    size_t totalSent = 0;
-
-    while (totalSent < messageLen)
+    // Get inputs from the client
+    std::string response;
+    while (connected)
     {
-        const ssize_t sent = send(sockfd, message_char + totalSent, messageLen - totalSent, MSG_NOSIGNAL);
+        bzero(response.data(), response.length());
+        response = tryListenToClient();
 
-        if (sent < 0)
-        {
-            if (errno == EINTR) continue; // interrupted, retry
-            std::cerr << "Send failed: " << strerror(errno) << std::endl;
-            return false;
-        }
+        decodeData(response);
 
-        totalSent += static_cast<size_t>(sent);
+        std::this_thread::sleep_for(std::chrono::milliseconds(16));
+    }
+}
+
+std::string ServerClientInstance::tryListenToClient()
+{
+    char buffer[256];
+    bzero(buffer, sizeof(buffer));
+
+    const int n = recv(_sockfd, &buffer, sizeof(buffer), 0);
+
+    if (n < 0)
+    {
+        std::cout << "Error writing to socket" << std::endl;
+        close(_sockfd);
+        connected = false;
+        return "ERROR";
     }
 
+    auto buffer_str = std::string(buffer, static_cast<size_t>(n));
+    return buffer_str;
+}
+
+void ServerClientInstance::sendToClient()
+{
+    while (connected)
+    {
+
+        constexpr size_t totalBytes = sizeof(int) * 17;
+        int data[17];
+
+        // we can use this to scope the lock
+        {
+            std::lock_guard lock(*gameMutex);
+            game->encodeData(data);
+        }
+
+        const auto data_char = reinterpret_cast<const char*>(data);
+        size_t totalSent = 0;
+
+        // std::cout << "Sending data to client " << _clientID << ": ";
+        // for (int i = 0; i < 17; ++i)
+        // {
+        //     if (i) std::cout << ", ";
+        //     std::cout << data[i];
+        // }
+        // std::cout << std::endl;
+
+        while (totalSent < totalBytes)
+        {
+            ssize_t sent = send(_sockfd, data_char + totalSent, totalBytes - totalSent, MSG_NOSIGNAL);
+            if (sent <= 0)
+            {
+                if (sent == -1 && errno == EINTR) continue;
+                std::cerr << "writeIntToConnection: send failed: " << strerror(errno) << std::endl;
+
+                connectionRetries++;
+
+                if (connectionRetries > 10)
+                {
+                    close(_sockfd);
+                    connected = false;
+                }
+            }
+            totalSent += static_cast<size_t>(sent);
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(16));
+    }
+}
+
+bool ServerClientInstance::trySendStringToClient(const std::string& message) const
+{
+    if (const int n = write(_sockfd, &message, sizeof(message)); n < 0)
+    {
+        std::cout << "Error writing to socket" << std::endl;
+        close(_sockfd);
+        return false;
+    }
     return true;
 }
 
-void Server::incrementClientsConnected()
+void ServerClientInstance::decodeData(const std::string& data)
 {
-    std::lock_guard lock(clientsMutex);
-    clientsConnected++;
+    if (data.size() >= 2)
+    {
+        keys[0] = (data[0] == '1');
+        keys[1] = (data[1] == '1');
+    }
 }
 
-void Server::decrementClientsConnected()
+void Server::disconnectInactiveClients()
 {
+    // make sure to lock the clients mutex before modifying the clients list
     std::lock_guard lock(clientsMutex);
-    if (clientsConnected > 0) clientsConnected--;
+
+    // iterate through the clients and remove any that are disconnected
+    for (const auto& client : clients)
+    {
+        if (client->connected == false)
+        {
+            std::erase(clients, client);
+        }
+    }
 }
 
-// Cleaned up by GitHub Copilot
+

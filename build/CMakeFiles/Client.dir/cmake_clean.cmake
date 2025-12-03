@@ -5,8 +5,6 @@ file(REMOVE_RECURSE
   "CMakeFiles/Client.dir/src/Game.cpp.o.d"
   "CMakeFiles/Client.dir/src/Server.cpp.o"
   "CMakeFiles/Client.dir/src/Server.cpp.o.d"
-  "CMakeFiles/Client.dir/src/Window.cpp.o"
-  "CMakeFiles/Client.dir/src/Window.cpp.o.d"
   "CMakeFiles/Client.dir/src/main.cpp.o"
   "CMakeFiles/Client.dir/src/main.cpp.o.d"
   "Client"

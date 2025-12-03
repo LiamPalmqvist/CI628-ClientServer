@@ -1,3 +1,5 @@
+#pragma once
+
 #include <sys/socket.h>
 #include <netinet/in.h> // for sockaddr_in
 #include <arpa/inet.h>
@@ -18,13 +20,13 @@ class Client {
     std::thread listeningThread;
     std::thread sendingThread;
     bool assigned = false;
-    int clientID;
+    int clientID{};
 
     Game game;
 
     // SDL INFORMATION
-    SDL_Window* window;
-    SDL_Renderer* renderer;
+    SDL_Window* window{};
+    SDL_Renderer* renderer{};
     bool windowIsOpen = true;
     bool keys[2] = {false, false};
 

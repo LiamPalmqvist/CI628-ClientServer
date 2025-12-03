@@ -11,7 +11,6 @@ set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/Users/liam/Programming/C++/CleanServerClient/src/Client.cpp" "CMakeFiles/Client.dir/src/Client.cpp.o" "gcc" "CMakeFiles/Client.dir/src/Client.cpp.o.d"
   "/Users/liam/Programming/C++/CleanServerClient/src/Game.cpp" "CMakeFiles/Client.dir/src/Game.cpp.o" "gcc" "CMakeFiles/Client.dir/src/Game.cpp.o.d"
   "/Users/liam/Programming/C++/CleanServerClient/src/Server.cpp" "CMakeFiles/Client.dir/src/Server.cpp.o" "gcc" "CMakeFiles/Client.dir/src/Server.cpp.o.d"
-  "/Users/liam/Programming/C++/CleanServerClient/src/Window.cpp" "CMakeFiles/Client.dir/src/Window.cpp.o" "gcc" "CMakeFiles/Client.dir/src/Window.cpp.o.d"
   "/Users/liam/Programming/C++/CleanServerClient/src/main.cpp" "CMakeFiles/Client.dir/src/main.cpp.o" "gcc" "CMakeFiles/Client.dir/src/main.cpp.o.d"
   )
 

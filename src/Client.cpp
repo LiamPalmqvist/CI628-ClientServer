@@ -1,6 +1,4 @@
 #include "Client.h"
-#include "Window.h"
-
 
 Client::Client(const std::string& ipAddress, const int port)
 {
@@ -104,7 +102,8 @@ void Client::listenToServer(const int sockfd)
                 {
                     std::cout << e.what() << std::endl;
                     std::cout << "Trying again" << std::endl;
-                    break;
+                    tryWriteToServer(sockfd, "ERROR");
+                    continue;
                 }
             }
 
@@ -112,7 +111,7 @@ void Client::listenToServer(const int sockfd)
 
             // Send ID assignment back
             std::cout << "Didn't break" << std::endl;
-            tryWriteToServer(sockfd, buffer_str);
+            tryWriteToServer(sockfd, "OK");
             std::cout << "Sending Client ID back to server" << std::endl;
 
             bzero(buffer_str.data(), buffer_str.length());
@@ -375,13 +374,17 @@ void Client::renderGameObjects() const
 
     for (int i = 0; i < 180; i++)
     {
-        float startx = centerX - cos(i) * radius;
-        float starty = centerY - sin(i) * radius;
-        float endx = centerX + cos(i) * radius;
-        float endy = centerY + sin(i) * radius;
+        float angle = i * M_PI / 180.0f;
+
+        float startx = centerX - cos(angle) * radius;
+        float starty = centerY - sin(angle) * radius;
+        float endx = centerX + cos(angle) * radius;
+        float endy = centerY + sin(angle) * radius;
 
         SDL_RenderDrawLine(renderer, startx, starty, endx, endy);
     }
+
+
 
     //SDL_RenderDrawLine(renderer, 0, 300, 800, 300);
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);

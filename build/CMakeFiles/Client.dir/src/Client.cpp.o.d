@@ -821,5 +821,4 @@ CMakeFiles/Client.dir/src/Client.cpp.o: \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__vector/pmr.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__vector/erase.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__vector/vector_bool_formatter.h \
-  /Users/liam/Programming/C++/CleanServerClient/src/Game.h \
-  /Users/liam/Programming/C++/CleanServerClient/src/Window.h
+  /Users/liam/Programming/C++/CleanServerClient/src/Game.h
