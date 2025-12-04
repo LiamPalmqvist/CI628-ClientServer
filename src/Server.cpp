@@ -39,7 +39,6 @@ Server::Server(const std::string& ipAddress, const int port)
             std::cerr << "Too many clients connected: " << e.what() << std::endl;
         }
 
-        // TODO: UNCOMMENT THIS WHEN READY TO TEST WITH 2 PLAYERS
         if (clients.size() >= 2)
         {
             game.update();
@@ -90,7 +89,6 @@ int Server::openPort(const std::string& ipAddress, const int port)
     serv_addr.sin_addr.s_addr = INADDR_ANY;
 
     // Bind the server information to the socket file descriptor
-    // Cleaned up by GitHub Copilot
     if (bind(sockfd, reinterpret_cast<sockaddr*>(&serv_addr), sizeof(serv_addr)) < 0)
     {
         close(sockfd); // close the socket
