@@ -2,7 +2,4 @@
 # Posted by tdashroy, modified by community. See post 'Timeline' for change history
 # Retrieved 2025-12-04, License - CC BY-SA 4.0
 
-add_custom_target(copy_assets
-COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_LIST_DIR}/copy_assets.cmake
-)
-add_dependencies(mytarget copy_assets)
+file(COPY ${CMAKE_CURRENT_LIST_DIR}/assets DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
