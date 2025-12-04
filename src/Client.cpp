@@ -357,6 +357,24 @@ void Client::instantiateGameObjects()
         playerPaddles.push_back(paddleRect);
     }
 
+
+    for (int i = 0; i < 10; i++)
+    {
+        std::string path = "assets/numbers/" + std::to_string(i) + ".png";
+        SDL_Surface* surface = IMG_Load(path.c_str());
+        if (!surface)
+        {
+            std::cout << "IMG_Load Error: " << IMG_GetError() << std::endl;
+            continue;
+        }
+        numbers[i] = SDL_CreateTextureFromSurface(renderer, surface);
+        SDL_FreeSurface(surface);
+        if (!numbers[i])
+        {
+            std::cout << "SDL_CreateTextureFromSurface Error: " << SDL_GetError() << std::endl;
+            continue;
+        }
+    }
 }
 
 void Client::renderGameObjects() const
@@ -367,6 +385,14 @@ void Client::renderGameObjects() const
     {
         SDL_RenderFillRect(renderer, &paddle);
     }
+
+    // Draw the images for the scores
+    int p1score = game.p1Points;
+    int p2score = game.p2Points;
+    SDL_Rect destRect1 = {350, 50, 50, 50};
+    SDL_Rect destRect2 = {400, 50, 50, 50};
+    SDL_RenderCopy(renderer, numbers[p1score], nullptr, &destRect1);
+    SDL_RenderCopy(renderer, numbers[p2score], nullptr, &destRect2);
 
     const int centerX = game.ball.get_x_pos();
     const int centerY = game.ball.get_y_pos();
@@ -384,6 +410,12 @@ void Client::renderGameObjects() const
         SDL_RenderDrawLine(renderer, startx, starty, endx, endy);
     }
 
+    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+    float angle = game.ball.get_direction() * M_PI / 180.0f;
+    float endx = centerX + cos(angle) * radius * 2;
+    float endy = centerY + sin(angle) * radius * 2;
+    SDL_RenderDrawLine(renderer, centerX, centerY, endx, endy);
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 
 
     //SDL_RenderDrawLine(renderer, 0, 300, 800, 300);

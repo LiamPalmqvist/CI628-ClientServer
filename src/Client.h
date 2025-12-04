@@ -7,12 +7,13 @@
 #include <iostream>
 #include <thread>
 #include <unistd.h>
-#include <SDL2/SDL.h>
 #include <chrono>
 #include <vector>
 
+#include <SDL2/SDL.h>
+#include <SDL2_image/SDL_image.h>
+
 #include "Game.h"
-// #include "Window.h"
 
 class Client {
     // Private variables
@@ -29,6 +30,7 @@ class Client {
     SDL_Renderer* renderer{};
     bool windowIsOpen = true;
     bool keys[2] = {false, false};
+    SDL_Texture* numbers[10] = {};
 
     std::vector<SDL_Rect> playerPaddles;
 

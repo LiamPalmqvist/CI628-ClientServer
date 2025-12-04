@@ -20,9 +20,9 @@ public:
     int _speed;
 
     // Functions
-    int get_x_pos() const { return _xPos; }
-    int get_y_pos() const { return _yPos; }
-    int get_speed() const { return _speed; }
+    [[nodiscard]] int get_x_pos() const { return _xPos; }
+    [[nodiscard]] int get_y_pos() const { return _yPos; }
+    [[nodiscard]] int get_speed() const { return _speed; }
 
     void set_x_pos(const int xPos) { _xPos = xPos; }
     void set_y_pos(const int yPos) { _yPos = yPos; }
@@ -41,8 +41,8 @@ public:
     Paddle(int xPos, int yPos, int xSize, int ySize);
 
     // Public functions
-    int get_xSize() const { return _xSize; }
-    int get_ySize() const { return _ySize; }
+    [[nodiscard]] int get_xSize() const { return _xSize; }
+    [[nodiscard]] int get_ySize() const { return _ySize; }
 
     void set_xSize(const int xSize) { _xSize = xSize; }
     void set_ySize(const int ySize) { _ySize = ySize; }
@@ -59,8 +59,8 @@ public:
     Ball(int xPos, int yPos, int size);
 
     // Public functions
-    int get_radius() const { return _radius; }
-    int get_direction() const { return _direction; }
+    [[nodiscard]] int get_radius() const { return _radius; }
+    [[nodiscard]] int get_direction() const { return _direction; }
 
     void set_radius(const int radius) { _radius = radius; }
     void set_direction(const int direction) { _direction = direction; }
@@ -90,7 +90,7 @@ public:
     // Public functions and methods
     void encodeData(int* outBuffer) const;
     void decodeData(int* data);
-    void printData();
+    void printData() const;
     void update();
 };
 
