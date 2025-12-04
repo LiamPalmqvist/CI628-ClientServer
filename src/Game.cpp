@@ -6,19 +6,19 @@
 #include <ostream>
 
 
-Paddle::Paddle(const int player)
+Paddle::Paddle(const int player) : GameObject()
 {
     if (player == 0)
         _xPos = 30;
     else
-        _xPos = 530;
+        _xPos = 770;
     _yPos = 300;
     _xSize = 10;
-    _ySize = 30;
+    _ySize = 100;
     _speed = 10;
 }
 
-Paddle::Paddle(const int xPos, const int yPos, const int xSize, const int ySize)
+Paddle::Paddle(const int xPos, const int yPos, const int xSize, const int ySize) : GameObject()
 {
     _xPos = xPos;
     _yPos = yPos;
@@ -26,16 +26,16 @@ Paddle::Paddle(const int xPos, const int yPos, const int xSize, const int ySize)
     _ySize = ySize;
 }
 
-Ball::Ball()
+Ball::Ball() : GameObject()
 {
     _xPos = 300;
     _yPos = 200;
     _radius = 10;
     _direction = 20;
-    _speed = 10;
+    _speed = 5;
 }
 
-Ball::Ball(const int xPos, const int yPos, const int size)
+Ball::Ball(const int xPos, const int yPos, const int size) : GameObject()
 {
     _xPos = xPos;
     _yPos = yPos;
@@ -44,113 +44,21 @@ Ball::Ball(const int xPos, const int yPos, const int size)
     _speed = 10;
 }
 
-Game::Game() : ball()
+Game::Game()
 {
     playing = false;
 }
-
-// void Game::update()
-// {
-//     // First, we check how many points each player has
-//     // if either player has 10 points, end the game
-//     if (p1Points >= 10)
-//     {
-//         playing = false;
-//         return;
-//     }
-//     if (p2Points >= 10)
-//     {
-//         playing = false;
-//         return;
-//     }
-//
-//
-//     // Second, we need to actually check where the ball is
-//     // Saves us updating things unnecessarily
-//     const int direction = ball.get_direction();
-//     const int speed = ball.get_speed();
-//     const int x = ball.get_x_pos();
-//     const int y = ball.get_y_pos();
-//
-//     if (x < 80)
-//     {
-//         p1Points++;
-//         ball.set_x_pos(200);
-//         ball.set_y_pos(300);
-//         ball.set_direction(20);
-//         playerPaddles[0].set_y_pos(300);
-//         playerPaddles[1].set_y_pos(300);
-//         return;
-//     }
-//     if (x > 320)
-//     {
-//         p2Points++;
-//         ball.set_x_pos(200);
-//         ball.set_y_pos(300);
-//         playerPaddles[0].set_y_pos(300);
-//         playerPaddles[1].set_y_pos(300);
-//         return;
-//     }
-//
-//     // get information about the paddles
-//     const int p1y = playerPaddles[0].get_y_pos();
-//     const int p1ySize = playerPaddles[0].get_ySize();
-//
-//     const int p2y = playerPaddles[1].get_y_pos();
-//     const int p2ySize = playerPaddles[1].get_ySize();
-//
-//     // Third, calculate the players' movements
-//     // std::cout << playerKeys[0] << " . " << playerKeys[1] << std::endl;
-//     if (playerKeys[0])
-//     {
-//         // std::cout << "was " << playerPaddles[0].get_y_pos() << std::endl;
-//         playerPaddles[0].set_y_pos(playerPaddles[0].get_y_pos()-playerPaddles[0].get_speed());
-//         // std::cout << "is now " << playerPaddles[0].get_y_pos() << std::endl;
-//     }
-//     if (playerKeys[1])
-//     {
-//         // std::cout << "was " << playerPaddles[0].get_y_pos() << std::endl;
-//         playerPaddles[0].set_y_pos(playerPaddles[0].get_y_pos()+playerPaddles[0].get_speed());
-//         // std::cout << "is now " << playerPaddles[0].get_y_pos() << std::endl;
-//     }
-//     if (playerKeys[2])
-//     {
-//         // std::cout << "was " << playerPaddles[1].get_y_pos() << std::endl;
-//         playerPaddles[1].set_y_pos(playerPaddles[1].get_y_pos()-playerPaddles[1].get_speed());
-//         // std::cout << "is now " << playerPaddles[1].get_y_pos() << std::endl;
-//     }
-//     if (playerKeys[3])
-//     {
-//         // std::cout << "was " << playerPaddles[1].get_y_pos() << std::endl;
-//         playerPaddles[1].set_y_pos(playerPaddles[1].get_y_pos()+playerPaddles[1].get_speed());
-//         // std::cout << "is now " << playerPaddles[1].get_y_pos() << std::endl;
-//     }
-//
-//     // Last, calculate ball's movement using trig
-//     // the speed will act as the hypotenuse and the direction the angle
-//     // if we have the hypotenuse and the angle, we can use the equation
-//     // hypotenuse * cos(angle) to get the tangent (x)
-//     // hypotenuse * sin(angle) to get the opposite (y)
-//     // the opposite will be our y value
-//     // the tangent will be our x value
-//     const float dx = speed * cos(direction);
-//     const float dy = speed * sin(direction);
-//     playerPaddles[0].set_x_pos(x+dx);
-//     playerPaddles[0].set_y_pos(y+dy);
-//
-//     checkCollisions();
-// }
 
 void Game::update()
 {
     // First, we check how many points each player has
     // if either player has 10 points, end the game
-    if (p1Points >= 10)
+    if (p1Points >= 9)
     {
         playing = false;
         return;
     }
-    if (p2Points >= 10)
+    if (p2Points >= 9)
     {
         playing = false;
         return;
@@ -185,7 +93,7 @@ void Game::update()
 
     // Second, we need to actually check where the ball is
     // Saves us updating things unnecessarily
-    const int balldirection = ball.get_direction();
+    const int balldirection = ball.get_direction() * M_PI / 180.0f;
     const int ballspeed = ball.get_speed();
     const int ballx = ball.get_x_pos();
     const int bally = ball.get_y_pos();
@@ -196,26 +104,20 @@ void Game::update()
         p2Points++;
         ball.set_x_pos(300);
         ball.set_y_pos(200);
-        ball.set_direction(60);
+        ball.set_direction(250);
         playerPaddles[0].set_y_pos(300);
         playerPaddles[1].set_y_pos(300);
         return;
     }
-    if (ballx > 600)
+    if (ballx > 800)
     {
         p1Points++;
         ball.set_x_pos(300);
         ball.set_y_pos(200);
-        ball.set_direction(200);
+        ball.set_direction(250);
         playerPaddles[0].set_y_pos(300);
         playerPaddles[1].set_y_pos(300);
         return;
-    }
-    if (bally > 400 || bally < 0)
-    {
-        int rotation = ball.get_direction();
-        rotation = rotation + 90;
-        ball.set_direction(rotation);
     }
 
     // Last, calculate ball's movement using trig
@@ -227,8 +129,8 @@ void Game::update()
     // the tangent will be our x value
     const float dx = ballspeed * cos(balldirection);
     const float dy = ballspeed * sin(balldirection);
-    ball.set_x_pos(ballx+dx);
-    ball.set_y_pos(bally+dy);
+    ball.set_x_pos(ballx + dx);
+    ball.set_y_pos(bally + dy);
 
     checkCollisions();
 }
@@ -250,24 +152,38 @@ void Game::checkCollisions()
     const int p2xSize = playerPaddles[1].get_xSize();
     const int p2ySize = playerPaddles[1].get_ySize();
 
-    // check if the ball is within the bounds of the paddles
-    if (ballX < p1x + p1xSize/2 && ballX > p1x - p1xSize/2 && ballY < p1y + p1ySize/2 && ballY > p1y + p1ySize/2)
+
+    // Reflect the ball when hitting the top of bottom
+    if (ballY <= 0)
     {
-        rotation += 180;
-        if (rotation > 360)
-            rotation -= 360;
-        else if (rotation < 0)
-            rotation += 360;
+        // calculate the angle of the ball
+        // calculate the x direction of the ball
+
+        rotation = rotation + 180;
+        rotation = 180 - rotation;
+
+        ball.set_y_pos(0 + ball.get_radius() * 2);
+        ball.set_direction(rotation);
+    } else if (ballY >= 600)
+    {
+        rotation = rotation + 180;
+        rotation = 180 - rotation;
+
+        ball.set_y_pos(600 - ball.get_radius() * 2);
         ball.set_direction(rotation);
     }
-    else if (ballX < p2x + p2xSize/2 && ballX > p2x - p2xSize/2 && ballY < p2y + p2ySize/2 && ballY > p2y + p2ySize/2)
+
+    // Reflect the ball when hitting the paddles
+    if (ballX <= p1x + p1xSize && ballX >= p1x && ballY <= p1y + p1ySize && ballY >= p1y)
     {
-        rotation += 180;
-        if (rotation > 360)
-            rotation-=360;
-        else if (rotation < 0)
-            rotation+=360;
+        rotation = 180 - rotation;
         ball.set_direction(rotation);
+        ball.set_x_pos(p1x + p1xSize + ball.get_radius() * 2);
+    } else if (ballX >= p2x - p2xSize && ballX <= p2x && ballY <= p2y + p2ySize && ballY >= p2y)
+    {
+        rotation = 180 - rotation;
+        ball.set_direction(rotation);
+        ball.set_x_pos(p2x - ball.get_radius() * 2);
     }
 }
 
@@ -293,64 +209,10 @@ void Game::encodeData(int* outBuffer) const
     outBuffer[14] = ball.get_speed();
     outBuffer[15] = ball.get_radius();
     outBuffer[16] = ball.get_direction();
-
-    /*std::string jsonTemplate = "{"
-        "\"p1\" : {"
-        "\"xpos\" : " + p1x + ","
-        "\"ypos\" : " + p1y + ","
-        "\"speed\" : " + p1speed + ","
-        "\"sizex\" : " + p1xSize + ","
-        "\"sizey\" : " + p1ySize + ","
-        "\"points\" : " + std::to_string(p1Points) +
-        "},"
-        "\"p2\" : {"
-        "\"xpos\" : " + p2x + ","
-        "\"ypos\" : " + p2y + ","
-        "\"speed\" : " + p2speed + ","
-        "\"sizex\" : " + p2xSize + ","
-        "\"sizey\" : " + p2ySize + ","
-        "\"points\" : " + std::to_string(p2Points) +
-        "},"
-        "\"ball\" : {"
-        "\"xpos\" : " + ballX + ","
-        "\"ypos\" : " + ballY + ","
-        "\"speed\" : " + ballSpeed + ","
-        "\"radius\" : " + ballRadius + ","
-        "\"direction\" : " + rotation +
-        "}"
-        "}";
-*/
-    // static int data[17];
-    //
-    // // Assign values every call
-    // data[0]  = p1x;
-    // data[1]  = p1y;
-    // data[2]  = p1speed;
-    // data[3]  = p1xSize;
-    // data[4]  = p1ySize;
-    // data[5]  = p1Points;
-    // data[6]  = p2x;
-    // data[7]  = p2y;
-    // data[8]  = p2speed;
-    // data[9]  = p2xSize;
-    // data[10] = p2ySize;
-    // data[11] = p2Points;
-    // data[12] = ballX;
-    // data[13] = ballY;
-    // data[14] = ballSpeed;
-    // data[15] = ballRadius;
-    // data[16] = ballRotation;
-    //
-    // return data;
 }
 
 void Game::decodeData(int* data)
 {
-    // for (int i = 0; i < 17; i++)
-    // {
-    //     std::cout << std::to_string(data[i]) + ", ";
-    // } std::cout << std::endl;
-
     playerPaddles[0].set_x_pos(data[0]);
     playerPaddles[0].set_y_pos(data[1]);
     playerPaddles[0].set_speed(data[2]);
@@ -372,7 +234,7 @@ void Game::decodeData(int* data)
     ball.set_direction(data[16]);
 }
 
-void Game::printData()
+void Game::printData() const
 {
     // get information about the paddles
     const std::string p1x = std::to_string(playerPaddles[0].get_x_pos());
