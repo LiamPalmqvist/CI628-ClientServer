@@ -51,6 +51,8 @@ Game::Game()
 
 void Game::update()
 {
+    playHitSound = false;
+
     // First, we check how many points each player has
     // if either player has 10 points, end the game
     if (p1Points >= 9)
@@ -107,6 +109,7 @@ void Game::update()
         ball.set_direction(250);
         playerPaddles[0].set_y_pos(300);
         playerPaddles[1].set_y_pos(300);
+        playHitSound = true;
         return;
     }
     if (ballx > 800)
@@ -117,6 +120,7 @@ void Game::update()
         ball.set_direction(250);
         playerPaddles[0].set_y_pos(300);
         playerPaddles[1].set_y_pos(300);
+        playHitSound = true;
         return;
     }
 
@@ -164,13 +168,16 @@ void Game::checkCollisions()
 
         ball.set_y_pos(0 + ball.get_radius() * 2);
         ball.set_direction(rotation);
-    } else if (ballY >= 600)
+        playHitSound = true;
+    }
+    else if (ballY >= 600)
     {
         rotation = rotation + 180;
         rotation = 180 - rotation;
 
         ball.set_y_pos(600 - ball.get_radius() * 2);
         ball.set_direction(rotation);
+        playHitSound = true;
     }
 
     // Reflect the ball when hitting the paddles
@@ -179,11 +186,14 @@ void Game::checkCollisions()
         rotation = 180 - rotation;
         ball.set_direction(rotation);
         ball.set_x_pos(p1x + p1xSize + ball.get_radius() * 2);
-    } else if (ballX >= p2x - p2xSize && ballX <= p2x && ballY <= p2y + p2ySize && ballY >= p2y)
+        playHitSound = true;
+    }
+    else if (ballX >= p2x - p2xSize && ballX <= p2x && ballY <= p2y + p2ySize && ballY >= p2y)
     {
         rotation = 180 - rotation;
         ball.set_direction(rotation);
         ball.set_x_pos(p2x - ball.get_radius() * 2);
+        playHitSound = true;
     }
 }
 
@@ -209,6 +219,9 @@ void Game::encodeData(int* outBuffer) const
     outBuffer[14] = ball.get_speed();
     outBuffer[15] = ball.get_radius();
     outBuffer[16] = ball.get_direction();
+
+    // Whether to play the hit sound effect
+    outBuffer[17] = playHitSound ? 1 : 0;
 }
 
 void Game::decodeData(int* data)
@@ -232,6 +245,12 @@ void Game::decodeData(int* data)
     ball.set_speed(data[14]);
     ball.set_radius(data[15]);
     ball.set_direction(data[16]);
+
+    // Reflect the ball when hitting the top of bottom
+    if (data[17] == 1)
+    {
+        Mix_PlayChannel(-1, ballHitSound, 0);
+    }
 }
 
 void Game::printData() const

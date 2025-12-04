@@ -7,6 +7,7 @@
 
 
 #include <iostream>
+#include <SDL2_mixer/SDL_mixer.h>
 
 // Since base gameObjects don't need to be initialised,
 // and it will only ever be inherited,
@@ -81,8 +82,11 @@ public:
     bool playerKeys[4] = {false, false, false, false};
     int p1Points = 0;
     int p2Points = 0;
+    bool playHitSound = false;
 
     bool playing;
+
+    Mix_Chunk *ballHitSound = NULL;
 
     // Public initialiser
     Game();

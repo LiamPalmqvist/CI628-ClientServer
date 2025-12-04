@@ -12,6 +12,7 @@
 
 #include <SDL2/SDL.h>
 #include <SDL2_image/SDL_image.h>
+#include <SDl2_mixer/SDL_mixer.h>
 
 #include "Game.h"
 
@@ -30,13 +31,19 @@ class Client {
     SDL_Renderer* renderer{};
     bool windowIsOpen = true;
     bool keys[2] = {false, false};
+
+    // SDL_Image INFORMATION
     SDL_Texture* numbers[10] = {};
+
+    // SDL_Mixer INFORMATION
+    Mix_Chunk* ballSound = nullptr;
 
     std::vector<SDL_Rect> playerPaddles;
 
     // SDL FUNCTIONS
     void init_SDL(const int sockfd);
     void getInputs(SDL_Event &event);
+    void loadMedia();
     void instantiateGameObjects();
     void renderGameObjects() const;
     void updateGameObjects();

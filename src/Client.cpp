@@ -128,10 +128,10 @@ void Client::listenToServer(const int sockfd)
         }
         else
         {
-            std::cout << "Trying to recieve int array from server" << std::endl;
+            // std::cout << "Trying to recieve int array from server" << std::endl;
             buffer_int = tryRecvIntFromServer(sockfd);
             game.decodeData(buffer_int);
-            game.printData();
+            // game.printData();
             bzero(buffer_int, sizeof(int)*17);
             // We can do this because we know the size of the data coming over
             // exactly
@@ -166,7 +166,7 @@ int* Client::tryRecvIntFromServer(const int sockfd)
 {
     //std::cout << "Trying to read from socket" << std::endl;
 
-    static int buffer[17];
+    static int buffer[18];
     if (const int n = recv(sockfd, buffer, sizeof(buffer), 0); n <= 0)
     {
         if (n == 0)
@@ -247,7 +247,7 @@ bool Client::validatePortNumber(const int& portNumber)
 
 void Client::init_SDL(const int sockfd) {
     // Check if we can create an SDL Window
-    if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0) {
         std::cout << "SDL_Init Error: " << SDL_GetError() << std::endl;
         return;
     }
@@ -293,12 +293,19 @@ void Client::init_SDL(const int sockfd) {
     // listeningThread = std::thread(&Client::listenToServer, this, sockfd);
     // sendingThread = std::thread(&Client::sendToServer, this, sockfd);
 
+    // Instantiate SDL_Mixer here
+    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0)
+    {
+        std::cout << "SDL_Mixer could not initialize! SDL_Mixer Error: " << Mix_GetError() << std::endl;
+        windowIsOpen = false;
+        return;
+    }
 
     // Finally, we get to the main loop
     SDL_Event event;
 
     // Game game;
-
+    loadMedia();
     instantiateGameObjects();
 
     // std::cout << "SDL_Event " << event.type << std::endl;
@@ -325,8 +332,24 @@ void Client::init_SDL(const int sockfd) {
         SDL_RenderPresent(renderer);
     }
 
+
+    // Free resources and close SDL
+    for (int i = 0; i < 10; i++)
+    {
+        SDL_DestroyTexture(numbers[i]);
+        numbers[i] = nullptr;
+    }
+
+    Mix_FreeChunk(ballSound);
+    ballSound = nullptr;
+
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
+    renderer = nullptr;
+    window = nullptr;
+
+    IMG_Quit();
+    Mix_Quit();
     SDL_Quit();
 
     sendingThread.detach();
@@ -349,15 +372,8 @@ void Client::getInputs(SDL_Event &event)
     //std::cout << "keys: " << keys[0] << " " << keys[1] << std::endl;
 }
 
-void Client::instantiateGameObjects()
+void Client::loadMedia()
 {
-    for (auto paddle : game.playerPaddles)
-    {
-        SDL_Rect paddleRect = {paddle.get_x_pos(), paddle.get_y_pos(), paddle.get_xSize(), paddle.get_ySize()};
-        playerPaddles.push_back(paddleRect);
-    }
-
-
     for (int i = 0; i < 10; i++)
     {
         std::string path = "assets/numbers/" + std::to_string(i) + ".png";
@@ -372,8 +388,23 @@ void Client::instantiateGameObjects()
         if (!numbers[i])
         {
             std::cout << "SDL_CreateTextureFromSurface Error: " << SDL_GetError() << std::endl;
-            continue;
         }
+    }
+
+    game.ballHitSound = Mix_LoadWAV("assets/sounds/ball_hit.wav");
+    if (game.ballHitSound == NULL)
+    {
+        std::cout << "Failed to load ball hit sound effect! SDL_Mixer Error: " << Mix_GetError() << std::endl;
+        windowIsOpen = false;
+    }
+}
+
+void Client::instantiateGameObjects()
+{
+    for (auto paddle : game.playerPaddles)
+    {
+        SDL_Rect paddleRect = {paddle.get_x_pos(), paddle.get_y_pos(), paddle.get_xSize(), paddle.get_ySize()};
+        playerPaddles.push_back(paddleRect);
     }
 }
 

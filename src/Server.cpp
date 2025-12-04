@@ -262,8 +262,8 @@ void ServerClientInstance::sendToClient()
     while (connected)
     {
 
-        constexpr size_t totalBytes = sizeof(int) * 17;
-        int data[17];
+        constexpr size_t totalBytes = sizeof(int) * 18;
+        int data[18];
 
         // we can use this to scope the lock
         {
