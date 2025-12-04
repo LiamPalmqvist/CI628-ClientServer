@@ -31,3 +31,10 @@ target_include_directories(${PROJECT_NAME}
         ${SDL2_IMAGE_INCLUDE_DIRS}
         ${SDL2_MIXER_INCLUDE_DIRS}
 )
+
+add_custom_target(copy_assets
+COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_LIST_DIR}/copy_assets.cmake
+)
+add_dependencies(${PROJECT_NAME} copy_assets)
+
+
